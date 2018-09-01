@@ -50,6 +50,8 @@ class QNetwork(nn.Module):
         x2 = F.relu(self.linear5(x2))
         x2 = self.linear6(x2)
         return x1, x2
+    
+    
 class GaussianPolicy(nn.Module):
     def __init__(self, num_inputs, num_actions, hidden_size):
         super(GaussianPolicy, self).__init__()

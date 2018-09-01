@@ -46,36 +46,27 @@ class SAC(object):
         return action
 
 
-    def update_parameters(self, state_batch, action_batch, reward_batch, next_state_batch, mask_batch, step):
+        def update_parameters(self, state_batch, action_batch, reward_batch, next_state_batch, mask_batch, step):
         state_batch = torch.FloatTensor(state_batch)
         next_state_batch = torch.FloatTensor(next_state_batch)
         action_batch = torch.FloatTensor(action_batch)
         reward_batch = torch.FloatTensor(reward_batch)
         mask_batch = torch.FloatTensor(np.float32(mask_batch))
 
-        expected_q_value = self.critic(state_batch, action_batch)
+        expected_q1_value, expected_q2_value = self.critic(state_batch, action_batch)
         expected_value = self.value(state_batch)
 
         new_action, log_prob, x_t, mean, log_std = self.policy.evaluate(state_batch, reparam=self.reparam)
-        """
-        Latent Space Policy
-        if self.action_prior == "normal":
-            act = new_action
-            act = act.size()
-            policy_prior = MultivariateNormal(torch.zeros(act[-1]), torch.eye(act[-1]))
-            policy_prior_log_probs = policy_prior.log_prob(new_action)
-            policy_prior_log_probs = policy_prior_log_probs.unsqueeze(1)
-        else:
-            policy_prior_log_probs = 0.0
-        """
-        
+
         target_value = self.value_target(next_state_batch)
         reward_batch = reward_batch.unsqueeze(1)
         mask_batch = mask_batch.unsqueeze(1)
         next_q_value = self.scale_R * reward_batch + mask_batch * self.gamma * target_value
-        q_value_loss = self.soft_q_criterion(expected_q_value, next_q_value.detach())
+        q1_value_loss = self.soft_q_criterion(expected_q1_value, next_q_value.detach())
+        q2_value_loss = self.soft_q_criterion(expected_q2_value, next_q_value.detach())
 
-        expected_new_q_value = self.critic(state_batch, new_action)
+        q1_new, q2_new = self.critic(state_batch, new_action)
+        expected_new_q_value = torch.min(q1_new, q2_new)
         next_value = expected_new_q_value - log_prob
         value_loss = self.value_criterion(expected_value, next_value.detach())
 
@@ -92,7 +83,11 @@ class SAC(object):
         policy_loss += mean_loss + std_loss + x_t_loss
 
         self.critic_optim.zero_grad()
-        q_value_loss.backward()
+        q1_value_loss.backward()
+        self.critic_optim.step()
+
+        self.critic_optim.zero_grad()
+        q2_value_loss.backward()
         self.critic_optim.step()
 
         self.value_optim.zero_grad()

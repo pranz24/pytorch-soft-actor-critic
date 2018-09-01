@@ -79,7 +79,7 @@ class GaussianPolicy(nn.Module):
         normal = Normal(mean, std)
 
         if reparam == True:
-            x_t = mean + std * torch.randn(1,6)
+            x_t = normal.rsample() # or mean + std * torch.randn(1,6)
         else:
             x_t = normal.sample()
 

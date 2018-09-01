@@ -57,6 +57,8 @@ class SAC(object):
         expected_value = self.value(state_batch)
 
         new_action, log_prob, x_t, mean, log_std = self.policy.evaluate(state_batch, reparam=self.reparam)
+        """
+        Latent Space Policy
         if self.action_prior == "normal":
             act = new_action
             act = act.size()
@@ -65,7 +67,8 @@ class SAC(object):
             policy_prior_log_probs = policy_prior_log_probs.unsqueeze(1)
         else:
             policy_prior_log_probs = 0.0
-
+        """
+        
         target_value = self.value_target(next_state_batch)
         reward_batch = reward_batch.unsqueeze(1)
         mask_batch = mask_batch.unsqueeze(1)
@@ -73,14 +76,14 @@ class SAC(object):
         q_value_loss = self.soft_q_criterion(expected_q_value, next_q_value.detach())
 
         expected_new_q_value = self.critic(state_batch, new_action)
-        next_value = expected_new_q_value - log_prob + policy_prior_log_probs
+        next_value = expected_new_q_value - log_prob
         value_loss = self.value_criterion(expected_value, next_value.detach())
 
         log_prob_target = expected_new_q_value - expected_value
         if self.reparam == True and self.algo == "SAC":
             policy_loss = (log_prob - expected_new_q_value).mean()
         else:
-            policy_loss = (log_prob * (log_prob - policy_prior_log_probs - log_prob_target).detach()).mean()
+            policy_loss = (log_prob * (log_prob - log_prob_target).detach()).mean()
 
         mean_loss = 0.001 * mean.pow(2).mean()
         std_loss = 0.001 * log_std.pow(2).mean()

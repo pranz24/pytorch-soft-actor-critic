@@ -37,7 +37,6 @@ class SAC(object):
 
         self.value_criterion = nn.MSELoss()
         self.soft_q_criterion = nn.MSELoss()
-        self.action_prior = "uniform"
         # Make sure target is with the same weight
         hard_update(self.value_target, self.value)
 

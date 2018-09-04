@@ -5,12 +5,13 @@ import numpy as np
 from gym import wrappers
 import torch
 from sac import SAC
+from tensorboardX import SummaryWriter
 from plot import plot_line
 from normalized_actions import NormalizedActions
 from replay_memory import ReplayMemory
 
 parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
-parser.add_argument('--algo', default='SAC(GMM)',
+parser.add_argument('--algo', default='SAC',
                     help='algorithm to use: SAC | SAC(GMM)')
 parser.add_argument('--env-name', default="HalfCheetah-v2",
                     help='name of the environment to run')
@@ -20,7 +21,7 @@ parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
                     help='discount factor for reward (default: 0.99)')
 parser.add_argument('--tau', type=float, default=0.005, metavar='G',
                     help='target smoothing coefficient(τ) (default: 0.005)')
-parser.add_argument('--k', type=int, default=4, metavar='G',
+parser.add_argument('--k', type=int, default=2, metavar='G',
                     help='No. of Mixtures (default: 4)')
 parser.add_argument('--scale_R', type=int, default=5, metavar='G',
                     help='reward scaling (default: 5)')
@@ -45,6 +46,7 @@ env = NormalizedActions(gym.make(args.env_name))
 env.seed(args.seed)
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
+writer = SummaryWriter()
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
 
@@ -68,7 +70,15 @@ for i_episode in range(args.num_episodes):
         if len(memory) > args.batch_size:
             for i in range(args.updates_per_step):
                 state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(args.batch_size)
-                agent.update_parameters(state_batch, action_batch, reward_batch, next_state_batch, mask_batch, total_numsteps)
+                policy_loss, critic_loss_1, critic_loss_2, value_loss = agent.update_parameters(state_batch, action_batch, \
+                                                                                                reward_batch, next_state_batch, \
+                                                                                                mask_batch, total_numsteps)
+                writer.add_scalar('loss/policy', policy_loss, updates)
+                writer.add_scalar('loss/critic_1', critic_loss_1, updates)
+                writer.add_scalar('loss/critic_2', critic_loss_2, updates)
+                writer.add_scalar('loss/value', value_loss, updates)
+
+                updates += 1
 
         state = next_state
         total_numsteps += 1
@@ -77,6 +87,7 @@ for i_episode in range(args.num_episodes):
         if done:
             break
 
+    writer.add_scalar('reward/train', episode_reward, i_episode)
     rewards.append(episode_reward)
     plot_line(total_numsteps, rewards, args.algo)
     print("Episode: {}, total numsteps: {}, reward: {}, average reward: {}".format(i_episode, total_numsteps, np.round(rewards[-1],2),

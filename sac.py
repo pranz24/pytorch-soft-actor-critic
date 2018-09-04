@@ -37,6 +37,7 @@ class SAC(object):
 
         self.value_criterion = nn.MSELoss()
         self.soft_q_criterion = nn.MSELoss()
+        #self.action_prior = "uniform"
         # Make sure target is with the same weight
         hard_update(self.value_target, self.value)
 
@@ -45,7 +46,7 @@ class SAC(object):
         return action
 
 
-        def update_parameters(self, state_batch, action_batch, reward_batch, next_state_batch, mask_batch, step):
+    def update_parameters(self, state_batch, action_batch, reward_batch, next_state_batch, mask_batch, step):
         state_batch = torch.FloatTensor(state_batch)
         next_state_batch = torch.FloatTensor(next_state_batch)
         action_batch = torch.FloatTensor(action_batch)
@@ -98,6 +99,7 @@ class SAC(object):
         self.policy_optim.step()
 
         soft_update(self.value_target, self.value, self.tau)
+        return q1_value_loss.item(), q2_value_loss.item(), value_loss.item(), policy_loss.item()
 
 
     def save_model(self, env_name, suffix="", actor_path=None, critic_path=None, value_path=None):

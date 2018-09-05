@@ -34,7 +34,6 @@ python main.py --algo SAC(GMM) --env-name HalfCheetah-v2 --k 4
 - [x] Reparameterization
 - [x] Gaussian Mixture Model
 - [x] Use 2 Q-functions
-- [ ] Deterministic Policy
-- [ ] Soft Actor-Critic (hard target update)
-- [ ] Evaluate the trained Policy
+- [x] Evaluate the trained Policy
+- [ ] Deterministic Policy (hard target update)
 

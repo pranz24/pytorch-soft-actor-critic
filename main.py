@@ -85,26 +85,5 @@ for i_episode in itertools.count():
     plot_line(total_numsteps, rewards, args)
     print("Episode: {}, total numsteps: {}, reward: {}, average reward: {}".format(i_episode, total_numsteps, np.round(rewards[-1],2),
                                                                                 np.round(np.mean(rewards[-100:]),2)))
-    if i_episode % 50 == 0 and args.eval==True:
-        state = torch.Tensor([env.reset()])
-        episode_reward = 0
-        while True:
-            action = agent.select_action(state, deterministic=True)
 
-            next_state, reward, done, _ = env.step(action)
-            episode_reward += reward
-
-            next_state = torch.Tensor([next_state])
-
-            state = next_state
-            if done:
-                break
-
-
-        rewards_test.append(episode_reward)
-        print("-----------------------------------Test-----------------------------------------------")
-        print("Episode: {}, total numsteps: {}, reward: {}, average reward: {}".format(i_episode, total_numsteps,
-                                                                                        np.round(rewards_test[-1],2),
-                                                                                        np.round(np.mean(rewards_test[-10:]),2)))
-        print("--------------------------------------------------------------------------------------")
 env.close()

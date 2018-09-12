@@ -37,7 +37,7 @@ python main.py --env-name Humanoid-v2 --scale_R 20 --deterministic True --tau 1 
 ### Results
 ------------
 My results on Humanoid-v2 environment using SAC and SAC(deterministic, hard update).
-This is a plot of average rewards at every 10000 steps interval 
+This is a plot of average rewards at every 10000 step interval 
 
 ![sacs](https://user-images.githubusercontent.com/18737539/45400165-b2f42980-b668-11e8-8e2b-2b5cdc226204.jpeg)
 

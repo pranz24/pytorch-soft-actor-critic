@@ -8,11 +8,17 @@ from utils import create_log_gaussian, logsumexp
 
 LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
+epsilon=1e-6
 
-def weights_init(m):
+def weights_init_policy(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
         torch.nn.init.normal_(m.weight, mean=0, std=0.1)
+
+def weights_init_vf(m):
+    classname = m.__class__.__name__
+    if classname.find('Linear') != -1:
+        torch.nn.init.xavier_normal_(m.weight)
 
 
 class ValueNetwork(nn.Module):
@@ -23,6 +29,7 @@ class ValueNetwork(nn.Module):
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
+        self.apply(weights_init_vf)
 
     def forward(self, state):
         x = F.relu(self.linear1(state))
@@ -45,6 +52,7 @@ class QNetwork(nn.Module):
         self.linear5 = nn.Linear(hidden_size, hidden_size)
         self.linear6 = nn.Linear(hidden_size, 1)
 
+        self.apply(weights_init_vf)
 
     def forward(self, state, action):
         x1 = torch.cat([state, action], 1)
@@ -71,7 +79,7 @@ class GaussianPolicy(nn.Module):
 
         self.log_std_linear = nn.Linear(hidden_size, num_actions)
 
-        self.apply(weights_init)
+        self.apply(weights_init_policy)
 
     def forward(self, state):
         x = F.relu(self.linear1(state))
@@ -81,86 +89,15 @@ class GaussianPolicy(nn.Module):
         log_std = torch.clamp(log_std, min=LOG_SIG_MIN, max=LOG_SIG_MAX)
         return mean, log_std
 
-    def evaluate(self, state, reparam=False, epsilon=1e-6):
+    def evaluate(self, state, reparam=False):
         mean, log_std = self.forward(state)
         std = log_std.exp()
-
         normal = Normal(mean, std)
-
         if reparam == True:
-            x_t = normal.rsample() #mean + std * torch.randn(1,6)
+            x_t = normal.rsample() # or mean + std * torch.randn(1,6)
         else:
             x_t = normal.sample()
-
         action = torch.tanh(x_t)
-
         log_prob = normal.log_prob(x_t) - torch.log(1 - action.pow(2) + epsilon)
         log_prob = log_prob.sum(-1, keepdim=True)
-
         return action, log_prob, x_t, mean, log_std
-
-    def get_action(self, state):
-        state = torch.FloatTensor(state).unsqueeze(0)
-        _, _, x_t, _, _ = self.evaluate(state)
-        action = torch.tanh(x_t)
-        action = action.detach().cpu().numpy()
-        return action[0]
-
-
-class GaussianMixturePolicy(nn.Module):
-    def __init__(self, num_inputs, num_actions, hidden_size, k):
-        super(GaussianMixturePolicy, self).__init__()
-        self.actions = num_actions
-        self.k = k
-
-        self.linear1 = nn.Linear(num_inputs, hidden_size)
-        self.linear2 = nn.Linear(hidden_size, hidden_size)
-
-        self.out_linear = nn.Linear(hidden_size, (k * 2 * self.actions) + k)
-
-        self.apply(weights_init)
-
-    def forward(self, state):
-        x = F.relu(self.linear1(state))
-        x = F.relu(self.linear2(x))
-
-        out = self.out_linear(x)
-        out = out.view(-1, self.k, (2 * self.actions) + 1)
-        log_w = out[:, :, 0]
-        mean = out[:, :, 1:1 + self.actions]
-        log_std = torch.clamp(out[:, :, 1 + self.actions:], min=LOG_SIG_MIN, max=LOG_SIG_MAX)
-
-        return log_w, mean, log_std
-
-    def evaluate(self, state, reparam=False, epsilon=1e-6):
-        log_w, mean, log_std = self.forward(state)
-        std = log_std.exp()
-        W = F.softmax(log_w, dim=1)
-        pi_picked = torch.multinomial(W, num_samples=1)
-        for i, r in enumerate(pi_picked):
-            means = mean[:, r, :]
-            means = means[:, 0, :]
-            stds = std[:, r, :]
-            stds = stds[:, 0, :]
-
-
-        # We can only reparameterize if there was one component in the GMM,
-        # in which case one should use GaussianPolicy
-        normal = Normal(means, stds)
-        x_t = normal.sample()
-        action = torch.tanh(x_t)
-
-
-        log_prob = create_log_gaussian(mean, log_std, x_t[:, None, :]) - torch.log(1 - action.pow(2) + epsilon).sum(
-            dim=-1, keepdim=True)
-        log_prob = logsumexp(log_prob + log_w, dim=-1, keepdim=True)
-        log_prob = log_prob - logsumexp(log_w, dim=-1, keepdim=True)
-        return action, log_prob, x_t, mean, log_std
-
-    def get_action(self, state):
-        state = torch.FloatTensor(state).unsqueeze(0)
-        _, _, x_t, _, _ = self.evaluate(state)
-        action = torch.tanh(x_t)
-
-        action = action.detach().cpu().numpy()
-        return action[0]

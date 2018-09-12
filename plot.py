@@ -4,14 +4,14 @@ import torch
 
 
 steps = []
-def plot_line(xs, ys_population, algo):
+def plot_line(xs, ys_population, args):
     steps.append(xs)
-    if algo == "SAC":
-        colour = 'rgb(0, 172, 237)'
-    elif algo == "SAC(GMM)":
-        colour = 'rgb(0, 172, 12)'
-    else:
+    if args.deterministic == True and args.value_update > 1:
         colour = 'rgb(172, 12, 0)'
+    elif args.deterministic == False and args.value_update <= 1:
+        colour = 'rgb(0, 172, 237)'
+    else:
+        colour = 'rgb(0, 172, 12)'
 
     ys = torch.Tensor(ys_population)
 
@@ -19,14 +19,14 @@ def plot_line(xs, ys_population, algo):
 
     trace = Scatter(x=steps, y=ys.numpy(), line=Line(color=colour), name='Reward')
 
-    if algo == "SAC(GMM)":
+    if args.deterministic == True and args.value_update > 1:
         plotly.offline.plot({
             'data': [trace],
-            'layout': dict(title='SAC(GMM)',
+            'layout': dict(title='SAC(Deterministic, Hard Update)',
                     xaxis={'title': 'Steps'},
                     yaxis={'title': 'Reward'})
-        }, filename='SAC(GMM).html', auto_open=False)
-    elif algo == "SAC":
+        }, filename='SAC(Deterministic).html', auto_open=False)
+    elif args.deterministic == False and args.value_update <= 1:
         plotly.offline.plot({
             'data': [trace],
             'layout': dict(title='SAC',
@@ -36,9 +36,7 @@ def plot_line(xs, ys_population, algo):
     else:
         plotly.offline.plot({
             'data': [trace],
-            'layout': dict(title=algo,
+            'layout': dict(title='SAC(Hard Update)',
                            xaxis={'title': 'Steps'},
                            yaxis={'title': 'Reward'})
-        }, filename='{}.html'.format(algo), auto_open=False)
-
-
+        }, filename='SAC(Hard Update).html', auto_open=False)

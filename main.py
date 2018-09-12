@@ -2,41 +2,40 @@ import argparse
 import math
 import gym
 import numpy as np
-from gym import wrappers
+import itertools
 import torch
 from sac import SAC
-from tensorboardX import SummaryWriter
 from plot import plot_line
 from normalized_actions import NormalizedActions
 from replay_memory import ReplayMemory
 
 parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
-parser.add_argument('--algo', default='SAC',
-                    help='algorithm to use: SAC | SAC(GMM)')
-parser.add_argument('--env-name', default="HalfCheetah-v2",
+parser.add_argument('--env-name', default="Pendulum-v0",
                     help='name of the environment to run')
+parser.add_argument('--deterministic', type=bool, default=False,
+                    help='use a deterministic policy (default:False)')
+parser.add_argument('--eval', type=bool, default=False,
+                    help='Evaluate a policy (default:False)')
 parser.add_argument('--reparam', type=bool, default=True,
                     help='reparameterize the policy (default:True)')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
                     help='discount factor for reward (default: 0.99)')
 parser.add_argument('--tau', type=float, default=0.005, metavar='G',
                     help='target smoothing coefficient(τ) (default: 0.005)')
-parser.add_argument('--k', type=int, default=2, metavar='G',
-                    help='No. of Mixtures (default: 4)')
 parser.add_argument('--scale_R', type=int, default=5, metavar='G',
                     help='reward scaling (default: 5)')
 parser.add_argument('--seed', type=int, default=543, metavar='N',
                     help='random seed (default: 543)')
 parser.add_argument('--batch_size', type=int, default=256, metavar='N',
                     help='batch size (default: 256)')
-parser.add_argument('--num_steps', type=int, default=1000, metavar='N',
-                    help='max episode length (default: 1000)')
-parser.add_argument('--num_episodes', type=int, default=1000, metavar='N',
-                    help='number of episodes (default: 1000)')
+parser.add_argument('--num_steps', type=int, default=1000000, metavar='N',
+                    help='maximum number of steps (default: 1000000)')
 parser.add_argument('--hidden_size', type=int, default=256, metavar='N',
                     help='hidden size (default: 256)')
 parser.add_argument('--updates_per_step', type=int, default=1, metavar='N',
                     help='model updates per simulator step (default: 1)')
+parser.add_argument('--value_update', type=int, default=1, metavar='N',
+                    help='Value target update per no. of updates per step (default: 1)')
 parser.add_argument('--replay_size', type=int, default=1000000, metavar='N',
                     help='size of replay buffer (default: 10000000)')
 args = parser.parse_args()
@@ -46,18 +45,17 @@ env = NormalizedActions(gym.make(args.env_name))
 env.seed(args.seed)
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
-writer = SummaryWriter()
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
 
 memory = ReplayMemory(args.replay_size)
 
-
 rewards = []
+rewards_test = []
 total_numsteps = 0
 updates = 0
 
-for i_episode in range(args.num_episodes):
+for i_episode in itertools.count():
     state = env.reset()
 
     episode_reward = 0
@@ -70,14 +68,7 @@ for i_episode in range(args.num_episodes):
         if len(memory) > args.batch_size:
             for i in range(args.updates_per_step):
                 state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(args.batch_size)
-                policy_loss, critic_loss_1, critic_loss_2, value_loss = agent.update_parameters(state_batch, action_batch, \
-                                                                                                reward_batch, next_state_batch, \
-                                                                                                mask_batch, total_numsteps)
-                writer.add_scalar('loss/policy', policy_loss, updates)
-                writer.add_scalar('loss/critic_1', critic_loss_1, updates)
-                writer.add_scalar('loss/critic_2', critic_loss_2, updates)
-                writer.add_scalar('loss/value', value_loss, updates)
-
+                agent.update_parameters(state_batch, action_batch, reward_batch, next_state_batch, mask_batch, updates)
                 updates += 1
 
         state = next_state
@@ -87,10 +78,33 @@ for i_episode in range(args.num_episodes):
         if done:
             break
 
-    writer.add_scalar('reward/train', episode_reward, i_episode)
+    if total_numsteps > args.num_steps:
+        break
+
     rewards.append(episode_reward)
-    plot_line(total_numsteps, rewards, args.algo)
+    plot_line(total_numsteps, rewards, args)
     print("Episode: {}, total numsteps: {}, reward: {}, average reward: {}".format(i_episode, total_numsteps, np.round(rewards[-1],2),
                                                                                 np.round(np.mean(rewards[-100:]),2)))
+    if i_episode % 50 == 0 and args.eval==True:
+        state = torch.Tensor([env.reset()])
+        episode_reward = 0
+        while True:
+            action = agent.select_action(state, deterministic=True)
 
+            next_state, reward, done, _ = env.step(action)
+            episode_reward += reward
+
+            next_state = torch.Tensor([next_state])
+
+            state = next_state
+            if done:
+                break
+
+
+        rewards_test.append(episode_reward)
+        print("-----------------------------------Test-----------------------------------------------")
+        print("Episode: {}, total numsteps: {}, reward: {}, average reward: {}".format(i_episode, total_numsteps,
+                                                                                        np.round(rewards_test[-1],2),
+                                                                                        np.round(np.mean(rewards_test[-10:]),2)))
+        print("--------------------------------------------------------------------------------------")
 env.close()

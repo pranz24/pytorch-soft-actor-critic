@@ -16,15 +16,22 @@ Contributions are welcome. If you find any mistake (very likely) or know how to 
 ------------
 Use the default hyperparameters.
 
-#### For SAC (Gaussian Policy):
+#### For SAC :
 
 ```
-python main.py --algo SAC --env-name HalfCheetah-v2
+python main.py --env-name Humanoid-v2 --scale_R 20 
 ```
-#### For SAC (Gaussian Mixture Policy):
+
+#### For SAC (Hard Update):
 
 ```
-python main.py --algo SAC(GMM) --env-name HalfCheetah-v2 --k 4
+python main.py --env-name Humanoid-v2 --scale_R 20 --tau 1 --value_update 1000
+```
+
+#### For SAC (Deterministic, Hard Update):
+
+```
+python main.py --env-name Humanoid-v2 --scale_R 20 --deterministic True --tau 1 --value_update 1000
 ```
 
 ### TODO

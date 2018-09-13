@@ -13,4 +13,4 @@ class NormalizedActions(gym.ActionWrapper):
         action -= self.action_space.low
         action /= (self.action_space.high - self.action_space.low)
         action = action * 2 - 1
-        return actions
+        return action

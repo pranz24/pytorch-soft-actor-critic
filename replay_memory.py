@@ -2,7 +2,6 @@ import random
 import numpy as np
 from collections import namedtuple
 
-
 class ReplayMemory:
     def __init__(self, capacity):
         self.capacity = capacity

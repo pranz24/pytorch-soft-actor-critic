@@ -40,16 +40,19 @@ parser.add_argument('--replay_size', type=int, default=1000000, metavar='N',
                     help='size of replay buffer (default: 10000000)')
 args = parser.parse_args()
 
+# Environment
 env = NormalizedActions(gym.make(args.env_name))
-
 env.seed(args.seed)
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
+
+# Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
-
+# Memory
 memory = ReplayMemory(args.replay_size)
 
+# Training Loop
 rewards = []
 rewards_test = []
 total_numsteps = 0
@@ -60,14 +63,15 @@ for i_episode in itertools.count():
 
     episode_reward = 0
     while True:
-        action = agent.select_action(state)
-        next_state, reward, done, _ = env.step(action)
-        mask = not done
-
-        memory.push(state, action, reward, next_state, mask)
+        action = agent.select_action(state)  # Sample action from policy
+        next_state, reward, done, _ = env.step(action)  # Step
+        mask = not done  # 1 for not done and 0 for done
+        memory.push(state, action, reward, next_state, mask)  # Append transition to memory
         if len(memory) > args.batch_size:
-            for i in range(args.updates_per_step):
+            for i in range(args.updates_per_step): # Number of updates per step in environment
+                # Sample a batch from memory
                 state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(args.batch_size)
+                # Update parameters of all the networks
                 agent.update_parameters(state_batch, action_batch, reward_batch, next_state_batch, mask_batch, updates)
                 updates += 1
 

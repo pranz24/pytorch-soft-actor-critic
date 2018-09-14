@@ -10,11 +10,13 @@ LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
 epsilon=1e-6
 
+# Initialize Policy weights
 def weights_init_policy(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
         torch.nn.init.normal_(m.weight, mean=0, std=0.1)
 
+# Initialize QNetwork and Value Network weights        
 def weights_init_vf(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
@@ -94,10 +96,12 @@ class GaussianPolicy(nn.Module):
         std = log_std.exp()
         normal = Normal(mean, std)
         if reparam == True:
-            x_t = normal.rsample() # or mean + std * torch.randn(1,6)
+            x_t = normal.rsample()  # reparameterization trick (mean + std * N(0,1))
         else:
-            x_t = normal.sample()
+            x_t = normal.sample()  # log-derivative trick (N(mean, std))
         action = torch.tanh(x_t)
-        log_prob = normal.log_prob(x_t) - torch.log(1 - action.pow(2) + epsilon)
+        log_prob = normal.log_prob(x_t)
+        # Enforcing Action Bound
+        log_prob -= torch.log(1 - action.pow(2) + epsilon)
         log_prob = log_prob.sum(-1, keepdim=True)
         return action, log_prob, x_t, mean, log_std

@@ -46,7 +46,7 @@ class SAC(object):
         else:
             _, _, _, x_t, _ = self.policy.evaluate(state)
             action = torch.tanh(x_t)
-        action = action.detach().cpu().numpy()
+        action = action.detach().numpy()
         return action[0]
 
 
@@ -61,6 +61,11 @@ class SAC(object):
         reward_batch = reward_batch.unsqueeze(1)  # reward_batch = [batch_size, 1]
         mask_batch = mask_batch.unsqueeze(1)  # mask_batch = [batch_size, 1]
         
+        """
+        Use two Q-functions to mitigate positive bias in the policy improvement step that is known
+        to degrade performance of value based methods. Two Q-functions also significantly speed
+        up training, especially on harder task.
+        """
         expected_q1_value, expected_q2_value = self.critic(state_batch, action_batch)
         new_action, log_prob, x_t, mean, log_std = self.policy.evaluate(state_batch, reparam=self.reparam)
 

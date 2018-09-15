@@ -14,7 +14,6 @@ Contributions are welcome. If you find any mistake (very likely) or know how to 
 
 ### Run
 ------------
-Use the default hyperparameters.
 
 #### For SAC :
 
@@ -41,3 +40,39 @@ This is a plot of average rewards at every 10000 step interval
 
 ![sac all](https://user-images.githubusercontent.com/18737539/45465027-f5813900-b730-11e8-8a5d-37a550e1971f.jpeg)
 
+### Hyperparameters
+-------------
+
+Use the following hyperparameters for different environment:
+
+| Parameters     | Value  |
+| --------------- | ------------- |
+|**Shared**|-|
+| optimizer | Adam |
+| learning rate  | 3·10−4 |
+| discount (γ) | 0.99 |
+| replay buffer size | 106 |
+|number of hidden layers (all networks)|2|
+|number of hidden units per layer|256|
+|number of samples per minibatch|256|
+|nonlinearity|ReLU|
+|**SAC**|-|
+|target smoothing coefficient (τ)|0.005|
+|target update interval|1|
+|gradient steps|1|
+|**SAC** *(Hard Update)*|-|
+|target smoothing coefficient (τ)|1|
+|target update interval|1000|
+|gradient steps (except humanoids)|4|
+|gradient steps (humanoids)|1|
+
+
+
+
+| Environment     | Reward Scale  |
+| --------------- | ------------- |
+| HalfCheetah-v2  | 5 |
+| Hopper-v2       | 5 |
+| Walker2d-v2     | 5 |
+| Ant-v2          | 5 |
+| Humanoid-v2     | 5 |

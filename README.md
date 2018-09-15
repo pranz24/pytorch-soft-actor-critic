@@ -24,13 +24,13 @@ python main.py --env-name Humanoid-v2 --scale_R 20
 #### For SAC (Hard Update):
 
 ```
-python main.py --env-name Humanoid-v2 --scale_R 20 --tau 1 --value_update 1000
+python main.py --env-name Humanoid-v2 --scale_R 20 --tau 1 --target_update_interval 1000
 ```
 
 #### For SAC (Deterministic, Hard Update):
 
 ```
-python main.py --env-name Humanoid-v2 --scale_R 20 --deterministic True --tau 1 --value_update 1000
+python main.py --env-name Humanoid-v2 --scale_R 20 --deterministic True --tau 1 --target_update_interval 1000
 ```
 
 ### Results

@@ -49,9 +49,9 @@ Use the following hyperparameters for different environment:
 | --------------- | ------------- |
 |**Shared**|-|
 | optimizer | Adam |
-| learning rate  | 3·10−4 |
+| learning rate  | 3x10<sup>−4</sup> |
 | discount (γ) | 0.99 |
-| replay buffer size | 106 |
+| replay buffer size | 1x10<sup>6</sup> |
 |number of hidden layers (all networks)|2|
 |number of hidden units per layer|256|
 |number of samples per minibatch|256|

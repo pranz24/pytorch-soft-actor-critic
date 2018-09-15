@@ -75,4 +75,4 @@ Use the following hyperparameters for different environment:
 | Hopper-v2       | 5 |
 | Walker2d-v2     | 5 |
 | Ant-v2          | 5 |
-| Humanoid-v2     | 5 |
+| Humanoid-v2     | 20 |

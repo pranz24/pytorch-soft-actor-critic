@@ -18,8 +18,8 @@ class SAC(object):
         self.scale_R = args.scale_R
         self.reparam = args.reparam
         self.deterministic = args.deterministic
-        self.value_update = args.value_update
-
+        self.target_update_interval = args.target_update_interval
+        
         self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size)
         self.policy_optim = Adam(self.policy.parameters(), lr=3e-4)
 
@@ -151,9 +151,9 @@ class SAC(object):
         We update the target weights to match the current value function weights periodically
         Update target parameter after every n(args.value_update) updates
         """
-        if updates % self.value_update == 0 and self.deterministic == True:
+        if updates % self.target_update_interval == 0 and self.deterministic == True:
             soft_update(self.critic_target, self.critic, self.tau)
-        elif updates % self.value_update == 0 and self.deterministic == False:
+        elif updates % self.target_update_interval == 0 and self.deterministic == False:
             soft_update(self.value_target, self.value, self.tau)
 
     # Save model parameters

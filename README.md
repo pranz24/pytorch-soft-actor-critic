@@ -49,22 +49,22 @@ Use the following hyperparameters for different environment:
 | --------------- | ------------- |
 |**Shared**|-|
 | optimizer | Adam |
-| learning rate  | 3x10<sup>−4</sup> |
-| discount (γ) | 0.99 |
-| replay buffer size | 1x10<sup>6</sup> |
+| learning rate(`--lr`)  | 3x10<sup>−4</sup> |
+| discount(`--gamma`) (γ) | 0.99 |
+| replay buffer size(`--replay_size`) | 1x10<sup>6</sup> |
 |number of hidden layers (all networks)|2|
-|number of hidden units per layer|256|
-|number of samples per minibatch|256|
+|number of hidden units per layer(`--hidden_size`)|256|
+|number of samples per minibatch(`--batch_size`)|256|
 |nonlinearity|ReLU|
 |**SAC**|-|
-|target smoothing coefficient (τ)|0.005|
-|target update interval|1|
-|gradient steps|1|
+|target smoothing coefficient(`--tau`) (τ)|0.005|
+|target update interval(`--target_update_interval`)|1|
+|gradient steps(`--updates_per_step`)|1|
 |**SAC** *(Hard Update)*|-|
-|target smoothing coefficient (τ)|1|
-|target update interval|1000|
-|gradient steps (except humanoids)|4|
-|gradient steps (humanoids)|1|
+|target smoothing coefficient(`--tau`) (τ)|1|
+|target update interval(`--target_update_interval`)|1000|
+|gradient steps (except humanoids)(`--updates_per_step`)|4|
+|gradient steps (humanoids)(`--updates_per_step`)|1|
 
 
 

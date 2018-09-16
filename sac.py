@@ -21,15 +21,15 @@ class SAC(object):
         self.target_update_interval = args.target_update_interval
         
         self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size)
-        self.policy_optim = Adam(self.policy.parameters(), lr=3e-4)
+        self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
         self.critic = QNetwork(self.num_inputs, self.action_space, args.hidden_size)
-        self.critic_optim = Adam(self.critic.parameters(), lr=3e-4)
+        self.critic_optim = Adam(self.critic.parameters(), lr=args.lr)
 
         if self.deterministic == False:
             self.value = ValueNetwork(self.num_inputs, args.hidden_size)
             self.value_target = ValueNetwork(self.num_inputs, args.hidden_size)
-            self.value_optim = Adam(self.value.parameters(), lr=3e-4)
+            self.value_optim = Adam(self.value.parameters(), lr=args.lr)
             hard_update(self.value_target, self.value)
             self.value_criterion = nn.MSELoss()
         else:

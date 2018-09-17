@@ -40,10 +40,9 @@ This is a plot of average rewards at every 10000 step interval
 
 ![sac all](https://user-images.githubusercontent.com/18737539/45465027-f5813900-b730-11e8-8a5d-37a550e1971f.jpeg)
 
-### Hyperparameters
+### Parameters
 -------------
 
-Use the following hyperparameters for different environment:
 
 | Parameters     | Value  |
 | --------------- | ------------- |

@@ -96,9 +96,9 @@ class GaussianPolicy(nn.Module):
         std = log_std.exp()
         normal = Normal(mean, std)
         if reparam == True:
-            x_t = normal.rsample()  # reparameterization trick (mean + std * N(0,1))
+            x_t = normal.rsample()  # for reparameterization trick (mean + std * N(0,1))
         else:
-            x_t = normal.sample()  # log-derivative trick (N(mean, std))
+            x_t = normal.sample()  # (N(mean, std))
         action = torch.tanh(x_t)
         log_prob = normal.log_prob(x_t)
         # Enforcing Action Bound

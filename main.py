@@ -5,7 +5,7 @@ import numpy as np
 import itertools
 import torch
 from sac import SAC
-from plot import plot_line
+from tensorboardX import SummaryWriter
 from normalized_actions import NormalizedActions
 from replay_memory import ReplayMemory
 
@@ -51,12 +51,13 @@ np.random.seed(args.seed)
 # Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
+writer = SummaryWriter()
+
 # Memory
 memory = ReplayMemory(args.replay_size)
 
 # Training Loop
 rewards = []
-rewards_test = []
 total_numsteps = 0
 updates = 0
 
@@ -75,6 +76,10 @@ for i_episode in itertools.count():
                 state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(args.batch_size)
                 # Update parameters of all the networks
                 agent.update_parameters(state_batch, action_batch, reward_batch, next_state_batch, mask_batch, updates)
+                writer.add_scalar('loss/value', value_loss, updates)
+                writer.add_scalar('loss/critic_1', critic_1_loss, updates)
+                writer.add_scalar('loss/critic_2', critic_2_loss, updates)
+                writer.add_scalar('loss/policy', policy_loss, updates)
                 updates += 1
 
         state = next_state
@@ -87,8 +92,8 @@ for i_episode in itertools.count():
     if total_numsteps > args.num_steps:
         break
 
+    writer.add_scalar('reward/train', episode_reward, i_episode)
     rewards.append(episode_reward)
-    plot_line(total_numsteps, rewards, args)
     print("Episode: {}, total numsteps: {}, reward: {}, average reward: {}".format(i_episode, total_numsteps, np.round(rewards[-1],2),
                                                                                 np.round(np.mean(rewards[-100:]),2)))
 

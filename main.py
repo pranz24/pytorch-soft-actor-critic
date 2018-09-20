@@ -75,7 +75,9 @@ for i_episode in itertools.count():
                 # Sample a batch from memory
                 state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(args.batch_size)
                 # Update parameters of all the networks
-                agent.update_parameters(state_batch, action_batch, reward_batch, next_state_batch, mask_batch, updates)
+                value_loss, critic_1_loss, critic_2_loss, policy_loss = agent.update_parameters(state_batch, action_batch, 
+                                                                                                reward_batch, next_state_batch, 
+                                                                                                mask_batch, updates)
                 writer.add_scalar('loss/value', value_loss, updates)
                 writer.add_scalar('loss/critic_1', critic_1_loss, updates)
                 writer.add_scalar('loss/critic_2', critic_2_loss, updates)

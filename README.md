@@ -9,7 +9,7 @@ Contributions are welcome. If you find any mistake (very likely) or know how to 
 ------------
 
 - [mujoco-py](https://github.com/openai/mujoco-py)
-- [Plotly](https://plot.ly/)
+- [TensorboardX](https://github.com/lanpa/tensorboardX)
 - [PyTorch](http://pytorch.org/)
 
 ### Run

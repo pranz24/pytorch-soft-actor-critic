@@ -149,12 +149,12 @@ class SAC(object):
         
         """
         We update the target weights to match the current value function weights periodically
-        Update target parameter after every n(args.value_update) updates
+        Update target parameter after every n(args.target_update_interval) updates
         """
-        if updates % self.value_update == 0 and self.deterministic == True:
+        if updates % self.target_update_interval == 0 and self.deterministic == True:
             soft_update(self.critic_target, self.critic, self.tau)
             return 0, q1_value_loss.item(), q2_value_loss.item(), policy_loss.item()
-        elif updates % self.value_update == 0 and self.deterministic == False:
+        elif updates % self.target_update_interval == 0 and self.deterministic == False:
             soft_update(self.value_target, self.value, self.tau)
             return value_loss.item(), q1_value_loss.item(), q2_value_loss.item(), policy_loss.item()
 

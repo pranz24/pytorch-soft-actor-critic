@@ -38,15 +38,19 @@ class SAC(object):
 
         self.soft_q_criterion = nn.MSELoss()
 
-    def select_action(self, state, deterministic=False):
+    def select_action(self, state, eval=False):
         state = torch.FloatTensor(state).unsqueeze(0)
-        if deterministic == False:
-            _, _, x_t, _, _ = self.policy.evaluate(state)
-            action = torch.tanh(x_t)
+        if eval == False:
+            self.policy.train()
+            print("train")
+            _, _, action, _, _ = self.policy.evaluate(state)
         else:
-            _, _, _, x_t, _ = self.policy.evaluate(state)
-            action = torch.tanh(x_t)
-        action = action.detach().numpy()
+            self.policy.eval()
+            print("eval")
+            _, _, _, action, _ = self.policy.evaluate(state)
+
+        action = torch.tanh(action)
+        action = action.detach().cpu().numpy()
         return action[0]
 
 

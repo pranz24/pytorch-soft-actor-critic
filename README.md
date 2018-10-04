@@ -68,7 +68,7 @@ This is a plot of average rewards at every 10000 step interval
 
 
 
-| Environment     | Reward Scale  |
+| Environment **(`--env-name`)**| Reward Scale **(`--scale_R`)**|
 | --------------- | ------------- |
 | HalfCheetah-v2  | 5 |
 | Hopper-v2       | 5 |

@@ -42,11 +42,9 @@ class SAC(object):
         state = torch.FloatTensor(state).unsqueeze(0)
         if eval == False:
             self.policy.train()
-            print("train")
             _, _, action, _, _ = self.policy.evaluate(state)
         else:
             self.policy.eval()
-            print("eval")
             _, _, _, action, _ = self.policy.evaluate(state)
 
         action = torch.tanh(action)

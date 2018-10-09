@@ -14,7 +14,7 @@ epsilon=1e-6
 def weights_init_policy(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
-        torch.nn.init.normal_(m.weight, mean=0, std=0.0.075)
+        torch.nn.init.normal_(m.weight, mean=0, std=0.1)
 
 # Initialize QNetwork and Value Network weights        
 def weights_init_vf(m):

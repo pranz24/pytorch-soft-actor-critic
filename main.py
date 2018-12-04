@@ -12,8 +12,8 @@ from replay_memory import ReplayMemory
 parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
 parser.add_argument('--env-name', default="Pendulum-v0",
                     help='name of the environment to run')
-parser.add_argument('--deterministic', type=bool, default=False,
-                    help='use a deterministic policy (default:False)')
+parser.add_argument('--policy', default="Gaussian",
+                    help='algorithm to use: Gaussian | Deterministic')
 parser.add_argument('--eval', type=bool, default=False,
                     help='Evaluate a policy (default:False)')
 parser.add_argument('--reparam', type=bool, default=True,
@@ -24,8 +24,8 @@ parser.add_argument('--tau', type=float, default=0.005, metavar='G',
                     help='target smoothing coefficient(τ) (default: 0.005)')
 parser.add_argument('--lr', type=float, default=0.0003, metavar='G',
                     help='learning rate (default: 0.0003)')
-parser.add_argument('--scale_R', type=int, default=5, metavar='G',
-                    help='reward scaling (default: 5)')
+parser.add_argument('--alpha', type=float, default=0.2, metavar='G',
+                    help='Entropy regularization coefficient is equivalent to inverse of reward scale. It is much more stable for training. (default: 0.2)')
 parser.add_argument('--seed', type=int, default=543, metavar='N',
                     help='random seed (default: 543)')
 parser.add_argument('--batch_size', type=int, default=256, metavar='N',
@@ -78,6 +78,7 @@ for i_episode in itertools.count():
                 value_loss, critic_1_loss, critic_2_loss, policy_loss = agent.update_parameters(state_batch, action_batch, 
                                                                                                 reward_batch, next_state_batch, 
                                                                                                 mask_batch, updates)
+
                 writer.add_scalar('loss/value', value_loss, updates)
                 writer.add_scalar('loss/critic_1', critic_1_loss, updates)
                 writer.add_scalar('loss/critic_2', critic_2_loss, updates)

@@ -25,7 +25,7 @@ parser.add_argument('--tau', type=float, default=0.005, metavar='G',
 parser.add_argument('--lr', type=float, default=0.0003, metavar='G',
                     help='learning rate (default: 0.0003)')
 parser.add_argument('--alpha', type=float, default=0.2, metavar='G',
-                    help='Temperature parameter α determines the relative importance of the entropy term against the reward (default: 0.2)'
+                    help='Temperature parameter α determines the relative importance of the entropy term against the reward (default: 0.2)')
 parser.add_argument('--seed', type=int, default=543, metavar='N',
                     help='random seed (default: 543)')
 parser.add_argument('--batch_size', type=int, default=256, metavar='N',

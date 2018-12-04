@@ -105,3 +105,27 @@ class GaussianPolicy(nn.Module):
         log_prob -= torch.log(1 - action.pow(2) + epsilon)
         log_prob = log_prob.sum(-1, keepdim=True)
         return action, log_prob, x_t, mean, log_std
+
+class DeterministicPolicy(nn.Module):
+    def __init__(self, num_inputs, num_actions, hidden_size):
+        super(DeterministicPolicy, self).__init__()
+
+        self.linear1 = nn.Linear(num_inputs, hidden_size)
+
+        self.linear2 = nn.Linear(hidden_size, hidden_size)
+
+        self.mean = nn.Linear(hidden_size, num_actions)
+        self.noise = torch.Tensor(num_actions)
+
+    def forward(self, inputs):
+        x = inputs
+        x = F.relu(self.linear1(x))
+        x = F.relu(self.linear2(x))
+        mean = F.tanh(self.mu(x))
+        return mean
+
+
+    def evaluate(self, state, reparam=False):
+        mean = self.forward(state)
+        action = mean + self.noise.normal_(0., std=0.015)
+        return action, torch.tensor(0.), action, mean, torch.tensor(0.)

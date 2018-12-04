@@ -121,7 +121,7 @@ class DeterministicPolicy(nn.Module):
         x = inputs
         x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))
-        mean = F.tanh(self.mu(x))
+        mean = F.tanh(self.mean(x))
         return mean
 
 

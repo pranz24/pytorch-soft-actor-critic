@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from torch.optim import Adam
 from utils import soft_update, hard_update
-from model import GaussianPolicy, QNetwork, ValueNetwork
+from model import GaussianPolicy, QNetwork, ValueNetwork, DeterministicPolicy
 
 
 class SAC(object):
@@ -15,28 +15,32 @@ class SAC(object):
         self.action_space = action_space.shape[0]
         self.gamma = args.gamma
         self.tau = args.tau
-        self.scale_R = args.scale_R
+        self.alpha = args.alpha
         self.reparam = args.reparam
-        self.deterministic = args.deterministic
+        self.policy_type = args.policy
         self.target_update_interval = args.target_update_interval
-        
-        self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size)
-        self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
         self.critic = QNetwork(self.num_inputs, self.action_space, args.hidden_size)
         self.critic_optim = Adam(self.critic.parameters(), lr=args.lr)
+        self.soft_q_criterion = nn.MSELoss()
 
-        if self.deterministic == False:
+        if self.policy_type == "Gaussian":
+            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size)
+            self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
+
             self.value = ValueNetwork(self.num_inputs, args.hidden_size)
             self.value_target = ValueNetwork(self.num_inputs, args.hidden_size)
             self.value_optim = Adam(self.value.parameters(), lr=args.lr)
             hard_update(self.value_target, self.value)
             self.value_criterion = nn.MSELoss()
         else:
+            self.policy = DeterministicPolicy(self.num_inputs, self.action_space, args.hidden_size)
+            self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
+
             self.critic_target = QNetwork(self.num_inputs, self.action_space, args.hidden_size)
             hard_update(self.critic_target, self.critic)
 
-        self.soft_q_criterion = nn.MSELoss()
+
 
     def select_action(self, state, eval=False):
         state = torch.FloatTensor(state).unsqueeze(0)
@@ -47,7 +51,7 @@ class SAC(object):
             self.policy.eval()
             _, _, _, action, _ = self.policy.evaluate(state)
 
-        action = torch.tanh(action)
+        #action = torch.tanh(action)
         action = action.detach().cpu().numpy()
         return action[0]
 
@@ -71,22 +75,22 @@ class SAC(object):
         expected_q1_value, expected_q2_value = self.critic(state_batch, action_batch)
         new_action, log_prob, x_t, mean, log_std = self.policy.evaluate(state_batch, reparam=self.reparam)
 
-
-        if self.deterministic == False:
+        if self.policy_type == "Gaussian":
             """
             Including a separate function approximator for the soft value can stabilize training.
             """
             expected_value = self.value(state_batch)
             target_value = self.value_target(next_state_batch)
-            next_q_value = self.scale_R * reward_batch + mask_batch * self.gamma * target_value  # Reward Scale * r(st,at) - γV(target)(st+1))
+            next_q_value = reward_batch + mask_batch * self.gamma * target_value  # Reward Scale * r(st,at) - γV(target)(st+1))
         else:
             """
             There is no need in principle to include a separate function approximator for the state value.
             We use a target critic network for deterministic policy and eradicate the value value network completely.
             """
-            target_critic_1, target_critic_2 = self.critic_target(next_state_batch, new_action)
+            next_state_action, _, _, _, _, = self.policy.evaluate(next_state_batch)
+            target_critic_1, target_critic_2 = self.critic_target(next_state_batch, next_state_action)
             target_critic = torch.min(target_critic_1, target_critic_2)
-            next_q_value = self.scale_R * reward_batch + mask_batch * self.gamma * target_critic  # Reward Scale * r(st,at) - γQ(target)(st+1)
+            next_q_value = reward_batch + mask_batch * self.gamma * target_critic  # Reward Scale * r(st,at) - γQ(target)(st+1)
         
         
         """
@@ -99,7 +103,7 @@ class SAC(object):
         q1_new, q2_new = self.critic(state_batch, new_action)
         expected_new_q_value = torch.min(q1_new, q2_new)
 
-        if self.deterministic == False:
+        if self.policy_type == "Gaussian":
             """
             Including a separate function approximator for the soft value can stabilize training and is convenient to 
             train simultaneously with the other networks
@@ -107,7 +111,7 @@ class SAC(object):
             JV = 𝔼st~D[0.5(V(st) - (𝔼at~π[Qmin(st,at) - log π(at|st)]))^2]
             ∇JV = ∇V(st)(V(st) - Q(st,at) + logπ(at|st))
             """
-            next_value = expected_new_q_value - log_prob
+            next_value = expected_new_q_value - (self.alpha * log_prob)
             value_loss = self.value_criterion(expected_value, next_value.detach())
             log_prob_target = expected_new_q_value - expected_value
         else:
@@ -121,7 +125,7 @@ class SAC(object):
             Jπ = 𝔼st∼D,εt∼N[logπ(f(εt;st)|st)−Q(st,f(εt;st))]
             ∇Jπ =∇log π + ([∇at log π(at|st) − ∇at Q(st,at)])∇f(εt;st)
             """
-            policy_loss = (log_prob - expected_new_q_value).mean()
+            policy_loss = ((self.alpha * log_prob) - expected_new_q_value).mean()
         else:
             policy_loss = (log_prob * (log_prob - log_prob_target).detach()).mean() # likelihood ratio gradient estimator
 
@@ -139,10 +143,12 @@ class SAC(object):
         q2_value_loss.backward()
         self.critic_optim.step()
 
-        if self.deterministic == False:
+        if self.policy_type == "Gaussian":
             self.value_optim.zero_grad()
             value_loss.backward()
             self.value_optim.step()
+        else:
+            value_loss = torch.tensor(0.)
 
         self.policy_optim.zero_grad()
         policy_loss.backward()
@@ -153,12 +159,12 @@ class SAC(object):
         We update the target weights to match the current value function weights periodically
         Update target parameter after every n(args.target_update_interval) updates
         """
-        if updates % self.target_update_interval == 0 and self.deterministic == True:
+        if updates % self.target_update_interval == 0 and self.policy_type == "Deterministic":
             soft_update(self.critic_target, self.critic, self.tau)
-            return 0, q1_value_loss.item(), q2_value_loss.item(), policy_loss.item()
-        elif updates % self.target_update_interval == 0 and self.deterministic == False:
+
+        elif updates % self.target_update_interval == 0 and self.policy_type == "Gaussian":
             soft_update(self.value_target, self.value, self.tau)
-            return value_loss.item(), q1_value_loss.item(), q2_value_loss.item(), policy_loss.item()
+        return value_loss.item(), q1_value_loss.item(), q2_value_loss.item(), policy_loss.item()
 
     # Save model parameters
     def save_model(self, env_name, suffix="", actor_path=None, critic_path=None, value_path=None):

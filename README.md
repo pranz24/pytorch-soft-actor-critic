@@ -17,27 +17,20 @@ Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf).
 #### For SAC :
 
 ```
-python main.py --env-name Humanoid-v2 --scale_R 20 
+python main.py --env-name Humanoid-v2 --alpha 0.05 
 ```
 
 #### For SAC (Hard Update):
 
 ```
-python main.py --env-name Humanoid-v2 --scale_R 20 --tau 1 --target_update_interval 1000
+python main.py --env-name Humanoid-v2 --alpha 0.05 --tau 1 --target_update_interval 1000
 ```
 
 #### For SAC (Deterministic, Hard Update):
 
 ```
-python main.py --env-name Humanoid-v2 --scale_R 20 --deterministic True --tau 1 --target_update_interval 1000
+python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_update_interval 1000
 ```
-
-### Results
-------------
-My results on Humanoid-v2 environment using SAC, SAC(hard update) and SAC(deterministic, hard update).
-This is a plot of average rewards at every 10000 step interval 
-
-![sac all](https://user-images.githubusercontent.com/18737539/45465027-f5813900-b730-11e8-8a5d-37a550e1971f.jpeg)
 
 ### Parameters
 -------------
@@ -67,10 +60,10 @@ This is a plot of average rewards at every 10000 step interval
 
 
 
-| Environment **(`--env-name`)**| Reward Scale **(`--scale_R`)**|
+| Environment **(`--env-name`)**| Temperature **(`--alpha`)**|
 | --------------- | ------------- |
-| HalfCheetah-v2  | 5 |
-| Hopper-v2       | 5 |
-| Walker2d-v2     | 5 |
-| Ant-v2          | 5 |
-| Humanoid-v2     | 20 |
+| HalfCheetah-v2  | 0.2 |
+| Hopper-v2       | 0.2 |
+| Walker2d-v2     | 0.2 |
+| Ant-v2          | 0.2 |
+| Humanoid-v2     | 0.05 |

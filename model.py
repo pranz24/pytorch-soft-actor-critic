@@ -4,7 +4,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Normal
-from utils import create_log_gaussian, logsumexp
 
 LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
@@ -91,14 +90,11 @@ class GaussianPolicy(nn.Module):
         log_std = torch.clamp(log_std, min=LOG_SIG_MIN, max=LOG_SIG_MAX)
         return mean, log_std
 
-    def evaluate(self, state, reparam=False):
+    def evaluate(self, state):
         mean, log_std = self.forward(state)
         std = log_std.exp()
         normal = Normal(mean, std)
-        if reparam == True:
-            x_t = normal.rsample()  # for reparameterization trick (mean + std * N(0,1))
-        else:
-            x_t = normal.sample()  # (N(mean, std))
+        x_t = normal.rsample()  # for reparameterization trick (mean + std * N(0,1))
         action = torch.tanh(x_t)
         log_prob = normal.log_prob(x_t)
         # Enforcing Action Bound
@@ -109,13 +105,13 @@ class GaussianPolicy(nn.Module):
 class DeterministicPolicy(nn.Module):
     def __init__(self, num_inputs, num_actions, hidden_size):
         super(DeterministicPolicy, self).__init__()
-
         self.linear1 = nn.Linear(num_inputs, hidden_size)
-
         self.linear2 = nn.Linear(hidden_size, hidden_size)
 
         self.mean = nn.Linear(hidden_size, num_actions)
         self.noise = torch.Tensor(num_actions)
+
+        self.apply(weights_init_policy)
 
     def forward(self, inputs):
         x = inputs
@@ -125,7 +121,7 @@ class DeterministicPolicy(nn.Module):
         return mean
 
 
-    def evaluate(self, state, reparam=False):
+    def evaluate(self, state):
         mean = self.forward(state)
         action = mean + self.noise.normal_(0., std=0.015)
-        return action, torch.tensor(0.), action, mean, torch.tensor(0.)
+        return action, torch.tensor(0.), torch.tensor(0.), mean, torch.tensor(0.)

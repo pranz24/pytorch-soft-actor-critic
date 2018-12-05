@@ -10,14 +10,12 @@ from normalized_actions import NormalizedActions
 from replay_memory import ReplayMemory
 
 parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
-parser.add_argument('--env-name', default="Pendulum-v0",
+parser.add_argument('--env-name', default="HalfCheetah-v2",
                     help='name of the environment to run')
 parser.add_argument('--policy', default="Gaussian",
                     help='algorithm to use: Gaussian | Deterministic')
 parser.add_argument('--eval', type=bool, default=False,
                     help='Evaluate a policy (default:False)')
-parser.add_argument('--reparam', type=bool, default=True,
-                    help='reparameterize the policy (default:True)')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
                     help='discount factor for reward (default: 0.99)')
 parser.add_argument('--tau', type=float, default=0.005, metavar='G',

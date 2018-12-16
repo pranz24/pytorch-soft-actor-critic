@@ -9,14 +9,8 @@ LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
 epsilon = 1e-6
 
-# Initialize Policy weights
-def weights_init_policy(m):
-    classname = m.__class__.__name__
-    if classname.find('Linear') != -1:
-        torch.nn.init.normal_(m.weight, mean=0, std=0.1)
-
-# Initialize QNetwork and Value Network weights        
-def weights_init_vf(m):
+# Initialize weights        
+def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
         torch.nn.init.xavier_normal_(m.weight)
@@ -30,7 +24,7 @@ class ValueNetwork(nn.Module):
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
-        self.apply(weights_init_vf)
+        self.apply(weights_init)
 
     def forward(self, state):
         x = F.relu(self.linear1(state))
@@ -53,7 +47,7 @@ class QNetwork(nn.Module):
         self.linear5 = nn.Linear(hidden_size, hidden_size)
         self.linear6 = nn.Linear(hidden_size, 1)
 
-        self.apply(weights_init_vf)
+        self.apply(weights_init)
 
     def forward(self, state, action):
         x1 = torch.cat([state, action], 1)
@@ -80,7 +74,7 @@ class GaussianPolicy(nn.Module):
 
         self.log_std_linear = nn.Linear(hidden_size, num_actions)
 
-        self.apply(weights_init_policy)
+        self.apply(weights_init)
 
     def forward(self, state):
         x = F.relu(self.linear1(state))
@@ -111,7 +105,7 @@ class DeterministicPolicy(nn.Module):
         self.mean = nn.Linear(hidden_size, num_actions)
         self.noise = torch.Tensor(num_actions)
 
-        self.apply(weights_init_policy)
+        self.apply(weights_init)
 
     def forward(self, inputs):
         x = inputs

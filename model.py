@@ -13,7 +13,7 @@ epsilon = 1e-6
 def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
-        torch.nn.init.xavier_normal_(m.weight)
+        torch.nn.init.xavier_uniform_(m.weight)
 
 
 class ValueNetwork(nn.Module):

@@ -14,6 +14,7 @@ def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
         torch.nn.init.xavier_uniform_(m.weight)
+        torch.nn.init.constant_(m.bias, 0)
 
 
 class ValueNetwork(nn.Module):

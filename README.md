@@ -58,7 +58,7 @@ python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_up
 |gradient steps (except humanoids)(`--updates_per_step`)|4|
 |gradient steps (humanoids)(`--updates_per_step`)|1|
 
-
+------------
 
 There is no need for setting Temperature manually if `--automatic_entropy_tuning` is True
 

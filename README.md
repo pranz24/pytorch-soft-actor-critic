@@ -43,6 +43,7 @@ python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_up
 | learning rate(`--lr`)  | 1x10<sup>−3</sup> |
 | discount(`--gamma`) (γ) | 0.99 |
 | replay buffer size(`--replay_size`) | 1x10<sup>6</sup> |
+| automatic_entropy_tuning(`--automatic_entropy_tuning`)|True|
 |number of hidden layers (all networks)|2|
 |number of hidden units per layer(`--hidden_size`)|256|
 |number of samples per minibatch(`--batch_size`)|256|
@@ -59,6 +60,7 @@ python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_up
 
 
 
+There is no need for setting Temperature manually if `--automatic_entropy_tuning` is True
 
 | Environment **(`--env-name`)**| Temperature **(`--alpha`)**|
 | --------------- | ------------- |

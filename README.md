@@ -17,13 +17,13 @@ Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf).
 #### For SAC :
 
 ```
-python main.py --env-name Humanoid-v2 --alpha 0.05 
+python main.py --env-name Humanoid-v2 --alpha 0.025 
 ```
 
 #### For SAC (Hard Update):
 
 ```
-python main.py --env-name Humanoid-v2 --alpha 0.05 --tau 1 --target_update_interval 1000
+python main.py --env-name Humanoid-v2 --alpha 0.025 --tau 1 --target_update_interval 1000
 ```
 
 #### For SAC (Deterministic, Hard Update):
@@ -62,8 +62,8 @@ python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_up
 
 | Environment **(`--env-name`)**| Temperature **(`--alpha`)**|
 | --------------- | ------------- |
-| HalfCheetah-v2  | 0.2 |
-| Hopper-v2       | 0.2 |
-| Walker2d-v2     | 0.2 |
-| Ant-v2          | 0.2 |
-| Humanoid-v2     | 0.05 |
+| HalfCheetah-v2  | 0.1 |
+| Hopper-v2       | 0.1 |
+| Walker2d-v2     | 0.1 |
+| Ant-v2          | 0.1 |
+| Humanoid-v2     | 0.025 |

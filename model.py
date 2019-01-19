@@ -9,11 +9,18 @@ LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
 epsilon = 1e-6
 
-# Initialize weights        
-def weights_init(m):
+# Initialize Policy weights
+def weights_init_policy_fn(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
-        torch.nn.init.xavier_uniform_(m.weight)
+        torch.nn.init.xavier_uniform_(m.weight, gain=0.5)
+        torch.nn.init.constant_(m.bias, 0)
+
+# Initialize Value Fn weights
+def weights_init_value_fn(m):
+    classname = m.__class__.__name__
+    if classname.find('Linear') != -1:
+        torch.nn.init.xavier_uniform_(m.weight, gain=1)
         torch.nn.init.constant_(m.bias, 0)
 
 

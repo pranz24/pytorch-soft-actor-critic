@@ -40,7 +40,7 @@ python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_up
 | --------------- | ------------- |
 |**Shared**|-|
 | optimizer | Adam |
-| learning rate(`--lr`)  | 3x10<sup>−4</sup> |
+| learning rate(`--lr`)  | 1x10<sup>−3</sup> |
 | discount(`--gamma`) (γ) | 0.99 |
 | replay buffer size(`--replay_size`) | 1x10<sup>6</sup> |
 |number of hidden layers (all networks)|2|

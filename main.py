@@ -1,5 +1,5 @@
 import argparse
-import math
+import time
 import gym
 import numpy as np
 import itertools
@@ -24,11 +24,13 @@ parser.add_argument('--lr', type=float, default=0.001, metavar='G',
                     help='learning rate (default: 0.001)')
 parser.add_argument('--alpha', type=float, default=0.1, metavar='G',
                     help='Temperature parameter α determines the relative importance of the entropy term against the reward (default: 0.1)')
-parser.add_argument('--seed', type=int, default=543, metavar='N',
-                    help='random seed (default: 543)')
+parser.add_argument('--automatic_entropy_tuning', type=bool, default=False, metavar='G',
+                    help='Temperature parameter α automaically adjusted.')
+parser.add_argument('--seed', type=int, default=456, metavar='N',
+                    help='random seed (default: 456)')
 parser.add_argument('--batch_size', type=int, default=256, metavar='N',
                     help='batch size (default: 256)')
-parser.add_argument('--num_steps', type=int, default=1000000, metavar='N',
+parser.add_argument('--num_steps', type=int, default=500001, metavar='N',
                     help='maximum number of steps (default: 1000000)')
 parser.add_argument('--hidden_size', type=int, default=256, metavar='N',
                     help='hidden size (default: 256)')
@@ -73,7 +75,7 @@ for i_episode in itertools.count():
                 # Sample a batch from memory
                 state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(args.batch_size)
                 # Update parameters of all the networks
-                value_loss, critic_1_loss, critic_2_loss, policy_loss = agent.update_parameters(state_batch, action_batch, 
+                value_loss, critic_1_loss, critic_2_loss, policy_loss, ent_loss, alpha = agent.update_parameters(state_batch, action_batch,
                                                                                                 reward_batch, next_state_batch, 
                                                                                                 mask_batch, updates)
 
@@ -81,6 +83,8 @@ for i_episode in itertools.count():
                 writer.add_scalar('loss/critic_1', critic_1_loss, updates)
                 writer.add_scalar('loss/critic_2', critic_2_loss, updates)
                 writer.add_scalar('loss/policy', policy_loss, updates)
+                writer.add_scalar('loss/entropy_loss', ent_loss, updates)
+                writer.add_scalar('entropy_temprature/alpha', alpha, updates)
                 updates += 1
 
         state = next_state

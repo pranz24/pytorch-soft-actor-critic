@@ -20,10 +20,10 @@ parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
                     help='discount factor for reward (default: 0.99)')
 parser.add_argument('--tau', type=float, default=0.005, metavar='G',
                     help='target smoothing coefficient(τ) (default: 0.005)')
-parser.add_argument('--lr', type=float, default=0.0003, metavar='G',
-                    help='learning rate (default: 0.0003)')
-parser.add_argument('--alpha', type=float, default=0.2, metavar='G',
-                    help='Temperature parameter α determines the relative importance of the entropy term against the reward (default: 0.2)')
+parser.add_argument('--lr', type=float, default=0.001, metavar='G',
+                    help='learning rate (default: 0.001)')
+parser.add_argument('--alpha', type=float, default=0.1, metavar='G',
+                    help='Temperature parameter α determines the relative importance of the entropy term against the reward (default: 0.1)')
 parser.add_argument('--seed', type=int, default=543, metavar='N',
                     help='random seed (default: 543)')
 parser.add_argument('--batch_size', type=int, default=256, metavar='N',

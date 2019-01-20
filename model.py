@@ -32,7 +32,7 @@ class ValueNetwork(nn.Module):
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
-        self.apply(weights_init)
+        self.apply(weights_init_value_fn)
 
     def forward(self, state):
         x = F.relu(self.linear1(state))
@@ -55,7 +55,7 @@ class QNetwork(nn.Module):
         self.linear5 = nn.Linear(hidden_size, hidden_size)
         self.linear6 = nn.Linear(hidden_size, 1)
 
-        self.apply(weights_init)
+        self.apply(weights_init_value_fn)
 
     def forward(self, state, action):
         x1 = torch.cat([state, action], 1)
@@ -82,7 +82,7 @@ class GaussianPolicy(nn.Module):
 
         self.log_std_linear = nn.Linear(hidden_size, num_actions)
 
-        self.apply(weights_init)
+        self.apply(weights_init_policy_fn)
 
     def forward(self, state):
         x = F.relu(self.linear1(state))
@@ -113,7 +113,7 @@ class DeterministicPolicy(nn.Module):
         self.mean = nn.Linear(hidden_size, num_actions)
         self.noise = torch.Tensor(num_actions)
 
-        self.apply(weights_init)
+        self.apply(weights_init_policy_fn)
 
     def forward(self, inputs):
         x = inputs

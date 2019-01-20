@@ -13,17 +13,18 @@ Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) and [Sof
 
 ### Run
 ------------
+(Note: There is no need for setting Temperature(`--alpha`) if `--automatic_entropy_tuning` is True.)
 
 #### For SAC :
 
 ```
-python main.py --env-name Humanoid-v2 --alpha 0.025 
+python main.py --env-name Humanoid-v2
 ```
 
 #### For SAC (Hard Update):
 
 ```
-python main.py --env-name Humanoid-v2 --alpha 0.025 --tau 1 --target_update_interval 1000
+python main.py --env-name Humanoid-v2 --tau 1 --target_update_interval 1000
 ```
 
 #### For SAC (Deterministic, Hard Update):
@@ -32,7 +33,7 @@ python main.py --env-name Humanoid-v2 --alpha 0.025 --tau 1 --target_update_inte
 python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_update_interval 1000
 ```
 
-### Parameters
+### Default Parameters
 -------------
 
 
@@ -59,8 +60,6 @@ python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_up
 |gradient steps (humanoids)(`--updates_per_step`)|1|
 
 ------------
-
-There is no need for setting Temperature manually if `--automatic_entropy_tuning` is True
 
 | Environment **(`--env-name`)**| Temperature **(`--alpha`)**|
 | --------------- | ------------- |

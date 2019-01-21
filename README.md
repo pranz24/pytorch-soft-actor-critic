@@ -18,13 +18,13 @@ Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) and [Sof
 #### For SAC :
 
 ```
-python main.py --env-name Humanoid-v2
+python main.py --env-name Humanoid-v2 --aplha 0.25
 ```
 
 #### For SAC (Hard Update):
 
 ```
-python main.py --env-name Humanoid-v2 --tau 1 --target_update_interval 1000
+python main.py --env-name Humanoid-v2 --aplha 0.25 --tau 1 --target_update_interval 1000
 ```
 
 #### For SAC (Deterministic, Hard Update):

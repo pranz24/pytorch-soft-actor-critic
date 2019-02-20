@@ -14,8 +14,8 @@ parser.add_argument('--env-name', default="HalfCheetah-v2",
                     help='name of the environment to run')
 parser.add_argument('--policy', default="Gaussian",
                     help='algorithm to use: Gaussian | Deterministic')
-parser.add_argument('--eval', type=bool, default=False,
-                    help='Evaluate a policy (default:False)')
+parser.add_argument('--eval', type=bool, default=True,
+                    help='Evaluates a policy a policy every 10 episode (default:True)')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
                     help='discount factor for reward (default: 0.99)')
 parser.add_argument('--tau', type=float, default=0.005, metavar='G',
@@ -36,6 +36,8 @@ parser.add_argument('--hidden_size', type=int, default=256, metavar='N',
                     help='hidden size (default: 256)')
 parser.add_argument('--updates_per_step', type=int, default=1, metavar='N',
                     help='model updates per simulator step (default: 1)')
+parser.add_argument('--start_steps', type=int, default=10000, metavar='N',
+                    help='Steps sampling random actions (default: 10000)')
 parser.add_argument('--target_update_interval', type=int, default=1, metavar='N',
                     help='Value target update per no. of updates per step (default: 1)')
 parser.add_argument('--replay_size', type=int, default=1000000, metavar='N',
@@ -58,6 +60,7 @@ memory = ReplayMemory(args.replay_size)
 
 # Training Loop
 rewards = []
+test_rewards = []
 total_numsteps = 0
 updates = 0
 
@@ -66,7 +69,10 @@ for i_episode in itertools.count():
 
     episode_reward = 0
     while True:
-        action = agent.select_action(state)  # Sample action from policy
+        if args.start_steps > total_numsteps:
+            action = env.action_space.sample()
+        else:
+            action = agent.select_action(state)  # Sample action from policy
         next_state, reward, done, _ = env.step(action)  # Step
         mask = not done  # 1 for not done and 0 for done
         memory.push(state, action, reward, next_state, mask)  # Append transition to memory
@@ -102,4 +108,26 @@ for i_episode in itertools.count():
     print("Episode: {}, total numsteps: {}, reward: {}, average reward: {}".format(i_episode, total_numsteps, np.round(rewards[-1],2),
                                                                                 np.round(np.mean(rewards[-100:]),2)))
 
+    if i_episode % 10 == 0 and args.eval == True:
+        state = torch.Tensor([env.reset()])
+        episode_reward = 0
+        while True:
+            action = agent.select_action(state, eval=True)
+
+            next_state, reward, done, _ = env.step(action)
+            episode_reward += reward
+
+
+            state = next_state
+            if done:
+                break
+
+        writer.add_scalar('reward/test', episode_reward, i_episode)
+
+        test_rewards.append(episode_reward)
+        print("----------------------------------------")
+        print("Test Episode: {}, reward: {}".format(i_episode, test_rewards[-1]))
+        print("----------------------------------------")
+
 env.close()
+

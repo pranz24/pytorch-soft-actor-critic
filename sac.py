@@ -15,24 +15,25 @@ class SAC(object):
         self.action_space = action_space.shape[0]
         self.gamma = args.gamma
         self.tau = args.tau
-        self.alpha = args.alpha
+
         self.policy_type = args.policy
         self.target_update_interval = args.target_update_interval
         self.automatic_entropy_tuning = args.automatic_entropy_tuning
 
-
         self.critic = QNetwork(self.num_inputs, self.action_space, args.hidden_size)
         self.critic_optim = Adam(self.critic.parameters(), lr=args.lr)
 
-        # Target Entropy = −dim(A) (e.g. , -6 for HalfCheetah-v2) as given in the paper
-        if self.automatic_entropy_tuning == True:
-            self.target_entropy = -torch.prod(torch.Tensor(action_space.shape)).item()
-            self.log_alpha = torch.zeros(1, requires_grad=True)
-            self.alpha_optim = Adam([self.log_alpha], lr=args.lr)
-        else:
-            pass
-
         if self.policy_type == "Gaussian":
+            self.alpha = args.alpha
+            # Target Entropy = −dim(A) (e.g. , -6 for HalfCheetah-v2) as given in the paper
+            if self.automatic_entropy_tuning == True:
+                self.target_entropy = -torch.prod(torch.Tensor(action_space.shape)).item()
+                self.log_alpha = torch.zeros(1, requires_grad=True)
+                self.alpha_optim = Adam([self.log_alpha], lr=args.lr)
+            else:
+                pass
+
+
             self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size)
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
@@ -53,11 +54,14 @@ class SAC(object):
         state = torch.FloatTensor(state).unsqueeze(0)
         if eval == False:
             self.policy.train()
-            action, _, _, _, _ = self.policy.evaluate(state)
+            action, _, _, _, _ = self.policy.sample(state)
         else:
             self.policy.eval()
-            _, _, _, action, _ = self.policy.evaluate(state)
-
+            _, _, _, action, _ = self.policy.sample(state)
+            if self.policy_type == "Gaussian":
+                action = torch.tanh(action)
+            else:
+                pass
         #action = torch.tanh(action)
         action = action.detach().cpu().numpy()
         return action[0]
@@ -68,50 +72,50 @@ class SAC(object):
         state_batch = torch.FloatTensor(state_batch)
         next_state_batch = torch.FloatTensor(next_state_batch)
         action_batch = torch.FloatTensor(action_batch)
-        reward_batch = torch.FloatTensor(reward_batch)
-        mask_batch = torch.FloatTensor(np.float32(mask_batch))
+        reward_batch = torch.FloatTensor(reward_batch).unsqueeze(1)
+        mask_batch = torch.FloatTensor(np.float32(mask_batch)).unsqueeze(1)
 
-        reward_batch = reward_batch.unsqueeze(1)  # reward_batch = [batch_size, 1]
-        mask_batch = mask_batch.unsqueeze(1)  # mask_batch = [batch_size, 1]
-        
         """
         Use two Q-functions to mitigate positive bias in the policy improvement step that is known
         to degrade performance of value based methods. Two Q-functions also significantly speed
         up training, especially on harder task.
         """
         expected_q1_value, expected_q2_value = self.critic(state_batch, action_batch)
-        new_action, log_prob, _, mean, log_std = self.policy.evaluate(state_batch)
-
-        if self.automatic_entropy_tuning:
-            """
-            Alpha Loss
-            """
-            alpha_loss = -(self.log_alpha * (log_prob + self.target_entropy).detach()).mean()
-            self.alpha_optim.zero_grad()
-            alpha_loss.backward()
-            self.alpha_optim.step()
-            self.alpha = self.log_alpha.exp()
-            alpha_logs = self.alpha.clone() # For TensorboardX logs
-        else:
-            alpha_loss = torch.tensor(0.)
-            alpha_logs = self.alpha # For TensorboardX logs
+        new_action, log_prob, _, mean, log_std = self.policy.sample(state_batch)
 
         if self.policy_type == "Gaussian":
+            if self.automatic_entropy_tuning:
+                """
+                Alpha Loss
+                """
+                alpha_loss = -(self.log_alpha * (log_prob + self.target_entropy).detach()).mean()
+                self.alpha_optim.zero_grad()
+                alpha_loss.backward()
+                self.alpha_optim.step()
+                self.alpha = self.log_alpha.exp()
+                alpha_logs = self.alpha.clone() # For TensorboardX logs
+            else:
+                alpha_loss = torch.tensor(0.)
+                alpha_logs = self.alpha # For TensorboardX logs
+
+
             """
             Including a separate function approximator for the soft value can stabilize training.
             """
             expected_value = self.value(state_batch)
             target_value = self.value_target(next_state_batch)
-            next_q_value = reward_batch + mask_batch * self.gamma * target_value
+            next_q_value = reward_batch + mask_batch * self.gamma * (target_value).detach()
         else:
             """
             There is no need in principle to include a separate function approximator for the state value.
             We use a target critic network for deterministic policy and eradicate the value value network completely.
             """
-            next_state_action, _, _, _, _, = self.policy.evaluate(next_state_batch)
+            alpha_loss = torch.tensor(0.)
+            alpha_logs = self.alpha  # For TensorboardX logs
+            next_state_action, _, _, _, _, = self.policy.sample(next_state_batch)
             target_critic_1, target_critic_2 = self.critic_target(next_state_batch, next_state_action)
             target_critic = torch.min(target_critic_1, target_critic_2)
-            next_q_value = reward_batch + mask_batch * self.gamma * target_critic
+            next_q_value = reward_batch + mask_batch * self.gamma * (target_critic).detach()
         
         
         """
@@ -119,8 +123,8 @@ class SAC(object):
         JQ = 𝔼(st,at)~D[0.5(Q1(st,at) - r(st,at) - γ(𝔼st+1~p[V(st+1)]))^2]
         ∇JQ = ∇Q(st,at)(Q(st,at) - r(st,at) - γV(target)(st+1))
         """
-        q1_value_loss = F.mse_loss(expected_q1_value, next_q_value.detach())
-        q2_value_loss = F.mse_loss(expected_q2_value, next_q_value.detach())
+        q1_value_loss = F.mse_loss(expected_q1_value, next_q_value)
+        q2_value_loss = F.mse_loss(expected_q2_value, next_q_value)
         q1_new, q2_new = self.critic(state_batch, new_action)
         expected_new_q_value = torch.min(q1_new, q2_new)
 

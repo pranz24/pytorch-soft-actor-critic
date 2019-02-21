@@ -44,7 +44,7 @@ python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_up
 | learning rate(`--lr`)  | 3x10<sup>−4</sup> |
 | discount(`--gamma`) (γ) | 0.99 |
 | replay buffer size(`--replay_size`) | 1x10<sup>6</sup> |
-| automatic_entropy_tuning(`--automatic_entropy_tuning`)|True|
+| automatic_entropy_tuning(`--automatic_entropy_tuning`)|False|
 |number of hidden layers (all networks)|2|
 |number of hidden units per layer(`--hidden_size`)|256|
 |number of samples per minibatch(`--batch_size`)|256|

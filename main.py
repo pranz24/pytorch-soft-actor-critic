@@ -42,6 +42,8 @@ parser.add_argument('--target_update_interval', type=int, default=1, metavar='N'
                     help='Value target update per no. of updates per step (default: 1)')
 parser.add_argument('--replay_size', type=int, default=1000000, metavar='N',
                     help='size of replay buffer (default: 10000000)')
+parser.add_argument('--cuda', action="store_true",
+                    help='run on CUDA (default: False)')
 args = parser.parse_args()
 
 # Environment

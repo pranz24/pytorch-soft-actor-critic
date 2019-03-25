@@ -20,38 +20,40 @@ class SAC(object):
         self.target_update_interval = args.target_update_interval
         self.automatic_entropy_tuning = args.automatic_entropy_tuning
 
-        self.critic = QNetwork(self.num_inputs, self.action_space, args.hidden_size)
+        self.device = torch.device("cuda" if args.cuda else "cpu") 
+
+        self.critic = QNetwork(self.num_inputs, self.action_space, args.hidden_size).to(device=self.device)
         self.critic_optim = Adam(self.critic.parameters(), lr=args.lr)
 
         if self.policy_type == "Gaussian":
             self.alpha = args.alpha
             # Target Entropy = −dim(A) (e.g. , -6 for HalfCheetah-v2) as given in the paper
             if self.automatic_entropy_tuning == True:
-                self.target_entropy = -torch.prod(torch.Tensor(action_space.shape)).item()
-                self.log_alpha = torch.zeros(1, requires_grad=True)
+                self.target_entropy = -torch.prod(torch.Tensor(action_space.shape).to(self.device)).item()
+                self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
                 self.alpha_optim = Adam([self.log_alpha], lr=args.lr)
             else:
                 pass
 
 
-            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size)
+            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size).to(self.device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
-            self.value = ValueNetwork(self.num_inputs, args.hidden_size)
-            self.value_target = ValueNetwork(self.num_inputs, args.hidden_size)
+            self.value = ValueNetwork(self.num_inputs, args.hidden_size).to(self.device)
+            self.value_target = ValueNetwork(self.num_inputs, args.hidden_size).to(self.device)
             self.value_optim = Adam(self.value.parameters(), lr=args.lr)
             hard_update(self.value_target, self.value)
         else:
-            self.policy = DeterministicPolicy(self.num_inputs, self.action_space, args.hidden_size)
+            self.policy = DeterministicPolicy(self.num_inputs, self.action_space, args.hidden_size).to(self.device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
-            self.critic_target = QNetwork(self.num_inputs, self.action_space, args.hidden_size)
+            self.critic_target = QNetwork(self.num_inputs, self.action_space, args.hidden_size).to(self.device)
             hard_update(self.critic_target, self.critic)
 
 
 
     def select_action(self, state, eval=False):
-        state = torch.FloatTensor(state).unsqueeze(0)
+        state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
         if eval == False:
             self.policy.train()
             action, _, _, _, _ = self.policy.sample(state)
@@ -69,11 +71,11 @@ class SAC(object):
 
 
     def update_parameters(self, state_batch, action_batch, reward_batch, next_state_batch, mask_batch, updates):
-        state_batch = torch.FloatTensor(state_batch)
-        next_state_batch = torch.FloatTensor(next_state_batch)
-        action_batch = torch.FloatTensor(action_batch)
-        reward_batch = torch.FloatTensor(reward_batch).unsqueeze(1)
-        mask_batch = torch.FloatTensor(np.float32(mask_batch)).unsqueeze(1)
+        state_batch = torch.FloatTensor(state_batch).to(self.device)
+        next_state_batch = torch.FloatTensor(next_state_batch).to(self.device)
+        action_batch = torch.FloatTensor(action_batch).to(self.device)
+        reward_batch = torch.FloatTensor(reward_batch).to(self.device).unsqueeze(1)
+        mask_batch = torch.FloatTensor(np.float32(mask_batch)).to(self.device).unsqueeze(1)
 
         """
         Use two Q-functions to mitigate positive bias in the policy improvement step that is known
@@ -95,7 +97,7 @@ class SAC(object):
                 self.alpha = self.log_alpha.exp()
                 alpha_logs = self.alpha.clone() # For TensorboardX logs
             else:
-                alpha_loss = torch.tensor(0.)
+                alpha_loss = torch.tensor(0.).to(self.device)
                 alpha_logs = self.alpha # For TensorboardX logs
 
 
@@ -110,7 +112,7 @@ class SAC(object):
             There is no need in principle to include a separate function approximator for the state value.
             We use a target critic network for deterministic policy and eradicate the value value network completely.
             """
-            alpha_loss = torch.tensor(0.)
+            alpha_loss = torch.tensor(0.).to(self.device)
             alpha_logs = self.alpha  # For TensorboardX logs
             next_state_action, _, _, _, _, = self.policy.sample(next_state_batch)
             target_critic_1, target_critic_2 = self.critic_target(next_state_batch, next_state_action)
@@ -169,7 +171,7 @@ class SAC(object):
             value_loss.backward()
             self.value_optim.step()
         else:
-            value_loss = torch.tensor(0.)
+            value_loss = torch.tensor(0.).to(self.device)
 
         self.policy_optim.zero_grad()
         policy_loss.backward()

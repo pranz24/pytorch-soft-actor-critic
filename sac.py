@@ -12,7 +12,6 @@ class SAC(object):
     def __init__(self, num_inputs, action_space, args):
 
         self.num_inputs = num_inputs
-        self.max_action = float(action_space.high[0])
         self.action_space = action_space.shape[0]
         self.gamma = args.gamma
         self.tau = args.tau
@@ -35,7 +34,7 @@ class SAC(object):
                 self.alpha_optim = Adam([self.log_alpha], lr=args.lr)
 
 
-            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size, self.max_action).to(self.device)
+            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size).to(self.device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
             self.value = ValueNetwork(self.num_inputs, args.hidden_size).to(self.device)

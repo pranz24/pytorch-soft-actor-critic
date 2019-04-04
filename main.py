@@ -22,13 +22,13 @@ parser.add_argument('--tau', type=float, default=0.005, metavar='G',
                     help='target smoothing coefficient(τ) (default: 0.005)')
 parser.add_argument('--lr', type=float, default=0.0003, metavar='G',
                     help='learning rate (default: 0.0003)')
-parser.add_argument('--alpha', type=float, default=0.1, metavar='G',
-                    help='Temperature parameter α determines the relative importance of the entropy term against the reward (default: 0.1)')
+parser.add_argument('--alpha', type=float, default=0.2, metavar='G',
+                    help='Temperature parameter α determines the relative importance of the entropy term against the reward (default: 0.2)')
 parser.add_argument('--automatic_entropy_tuning', type=bool, default=False, metavar='G',
                     help='Temperature parameter α automaically adjusted.')
 parser.add_argument('--seed', type=int, default=456, metavar='N',
                     help='random seed (default: 456)')
-parser.add_argument('--batch_size', type=int, default=256, metavar='N',
+parser.add_argument('--batch_size', type=int, default=100, metavar='N',
                     help='batch size (default: 256)')
 parser.add_argument('--num_steps', type=int, default=1000001, metavar='N',
                     help='maximum number of steps (default: 1000000)')
@@ -48,9 +48,9 @@ args = parser.parse_args()
 
 # Environment
 env = NormalizedActions(gym.make(args.env_name))
-env.seed(args.seed)
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
+env.seed(args.seed)
 
 # Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
@@ -66,18 +66,15 @@ test_rewards = []
 total_numsteps = 0
 updates = 0
 
-for i_episode in itertools.count():
+for i_episode in itertools.count(1):
     state = env.reset()
-
     episode_reward = 0
+
     while True:
         if args.start_steps > total_numsteps:
             action = env.action_space.sample()
         else:
             action = agent.select_action(state)  # Sample action from policy
-        next_state, reward, done, _ = env.step(action)  # Step
-        mask = not done  # 1 for not done and 0 for done
-        memory.push(state, action, reward, next_state, mask)  # Append transition to memory
         if len(memory) > args.batch_size:
             for i in range(args.updates_per_step): # Number of updates per step in environment
                 # Sample a batch from memory
@@ -94,6 +91,11 @@ for i_episode in itertools.count():
                 writer.add_scalar('loss/entropy_loss', ent_loss, updates)
                 writer.add_scalar('entropy_temprature/alpha', alpha, updates)
                 updates += 1
+
+        next_state, reward, done, _ = env.step(action)  # Step
+        mask = float(not done)  # 1 for not done and 0 for done
+
+        memory.push(state, action, reward, next_state, mask) # Append transition to memory
 
         state = next_state
         total_numsteps += 1

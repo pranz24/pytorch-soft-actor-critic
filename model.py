@@ -11,8 +11,7 @@ epsilon = 1e-6
 
 # Initialize Policy weights
 def weights_init_(m):
-    classname = m.__class__.__name__
-    if classname.find('Linear') != -1:
+    if isinstance(m, nn.Linear):
         torch.nn.init.xavier_uniform_(m.weight, gain=1)
         torch.nn.init.constant_(m.bias, 0)
 
@@ -51,13 +50,13 @@ class QNetwork(nn.Module):
         self.apply(weights_init_)
 
     def forward(self, state, action):
-        x1 = torch.cat([state, action], 1)
-        x1 = F.relu(self.linear1(x1))
+        xu = torch.cat([state, action], 1)
+        
+        x1 = F.relu(self.linear1(xu))
         x1 = F.relu(self.linear2(x1))
         x1 = self.linear3(x1)
 
-        x2 = torch.cat([state, action], 1)
-        x2 = F.relu(self.linear4(x2))
+        x2 = F.relu(self.linear4(xu))
         x2 = F.relu(self.linear5(x2))
         x2 = self.linear6(x2)
 
@@ -65,9 +64,10 @@ class QNetwork(nn.Module):
 
 
 class GaussianPolicy(nn.Module):
-    def __init__(self, num_inputs, num_actions, hidden_dim):
+    def __init__(self, num_inputs, num_actions, hidden_dim, max_act):
         super(GaussianPolicy, self).__init__()
-
+        
+        self.max_action = max_act
         self.linear1 = nn.Linear(num_inputs, hidden_dim)
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
 
@@ -94,7 +94,7 @@ class GaussianPolicy(nn.Module):
         # Enforcing Action Bound
         log_prob -= torch.log(1 - action.pow(2) + epsilon)
         log_prob = log_prob.sum(1, keepdim=True)
-        return action, log_prob, x_t, mean, log_std
+        return action, log_prob, torch.tanh(mean)
 
 class DeterministicPolicy(nn.Module):
     def __init__(self, num_inputs, num_actions, hidden_dim):

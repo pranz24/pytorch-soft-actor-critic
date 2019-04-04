@@ -118,5 +118,5 @@ class DeterministicPolicy(nn.Module):
         noise = self.noise.normal_(0., std=0.1)
         noise = noise.clamp(-0.25, 0.25)
         action = mean + noise
-        return action, torch.tensor(0.), torch.tensor(0.), mean, torch.tensor(0.)
+        return action, mean, torch.tensor(0.)
     

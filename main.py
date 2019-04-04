@@ -28,7 +28,7 @@ parser.add_argument('--automatic_entropy_tuning', type=bool, default=False, meta
                     help='Temperature parameter α automaically adjusted.')
 parser.add_argument('--seed', type=int, default=456, metavar='N',
                     help='random seed (default: 456)')
-parser.add_argument('--batch_size', type=int, default=100, metavar='N',
+parser.add_argument('--batch_size', type=int, default=256, metavar='N',
                     help='batch size (default: 256)')
 parser.add_argument('--num_steps', type=int, default=1000001, metavar='N',
                     help='maximum number of steps (default: 1000000)')

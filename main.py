@@ -1,5 +1,5 @@
 import argparse
-import time
+import datetime
 import gym
 import numpy as np
 import itertools
@@ -47,7 +47,7 @@ parser.add_argument('--cuda', action="store_true",
 args = parser.parse_args()
 
 # Environment
-env = NormalizedActions(gym.make(args.env_name))
+env = gym.make(args.env_name) # Removing Normalized Actions
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 env.seed(args.seed)
@@ -55,7 +55,8 @@ env.seed(args.seed)
 # Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
-writer = SummaryWriter()
+writer = SummaryWriter(log_dir='runs/{}_SAC_{}_{}_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name,
+                                                             args.policy, "autotune" if args.automatic_entropy_tuning else ""))
 
 # Memory
 memory = ReplayMemory(args.replay_size)
@@ -67,24 +68,22 @@ total_numsteps = 0
 updates = 0
 
 for i_episode in itertools.count(1):
-    state = env.reset()
     episode_reward = 0
+    episode_steps = 0
+    done = False
+    state = env.reset()
 
-    while True:
+    while not done:
         if args.start_steps > total_numsteps:
             action = env.action_space.sample()
         else:
             action = agent.select_action(state)  # Sample action from policy
-        if len(memory) > args.batch_size:
-            for i in range(args.updates_per_step): # Number of updates per step in environment
-                # Sample a batch from memory
-                state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(args.batch_size)
-                # Update parameters of all the networks
-                value_loss, critic_1_loss, critic_2_loss, policy_loss, ent_loss, alpha = agent.update_parameters(state_batch, action_batch,
-                                                                                                reward_batch, next_state_batch, 
-                                                                                                mask_batch, updates)
 
-                writer.add_scalar('loss/value', value_loss, updates)
+        if len(memory) > args.batch_size:
+            for i in range(args.updates_per_step):  # Number of updates per step in environment
+                # Update parameters of all the networks
+                critic_1_loss, critic_2_loss, policy_loss, ent_loss, alpha = agent.update_parameters(memory, args.batch_size, updates)
+
                 writer.add_scalar('loss/critic_1', critic_1_loss, updates)
                 writer.add_scalar('loss/critic_2', critic_2_loss, updates)
                 writer.add_scalar('loss/policy', policy_loss, updates)
@@ -92,30 +91,30 @@ for i_episode in itertools.count(1):
                 writer.add_scalar('entropy_temprature/alpha', alpha, updates)
                 updates += 1
 
-        next_state, reward, done, _ = env.step(action)  # Step
-        mask = float(not done)  # 1 for not done and 0 for done
+        next_state, reward, done, _ = env.step(action) # Step
+        episode_steps += 1
+        total_numsteps += 1
+        episode_reward += reward
+
+        # Ignore the "done" signal if it comes from hitting the time horizon.
+        # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
+        mask = 1 if episode_steps == env._max_episode_steps else float(not done)
 
         memory.push(state, action, reward, next_state, mask) # Append transition to memory
 
         state = next_state
-        total_numsteps += 1
-        episode_reward += reward
-
-        if done:
-            break
 
     if total_numsteps > args.num_steps:
         break
 
     writer.add_scalar('reward/train', episode_reward, i_episode)
     rewards.append(episode_reward)
-    print("Episode: {}, total numsteps: {}, reward: {}, average reward: {}".format(i_episode, total_numsteps, np.round(rewards[-1],2),
-                                                                                np.round(np.mean(rewards[-100:]),2)))
+    print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episode, total_numsteps, episode_steps, np.round(rewards[-1],2)))
 
     if i_episode % 10 == 0 and args.eval == True:
         state = env.reset()
         episode_reward = 0
-        while True:
+        while not done:
             action = agent.select_action(state, eval=True)
 
             next_state, reward, done, _ = env.step(action)
@@ -123,8 +122,7 @@ for i_episode in itertools.count(1):
 
 
             state = next_state
-            if done:
-                break
+
 
         writer.add_scalar('reward/test', episode_reward, i_episode)
 

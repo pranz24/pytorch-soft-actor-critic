@@ -91,7 +91,7 @@ class GaussianPolicy(nn.Module):
         # Enforcing Action Bound
         log_prob -= torch.log(1 - action.pow(2) + epsilon)
         log_prob = log_prob.sum(1, keepdim=True)
-        return action, log_prob, torch.tanh(mean)
+        return action, log_prob, mean, log_std
 
 class DeterministicPolicy(nn.Module):
     def __init__(self, num_inputs, num_actions, hidden_dim):

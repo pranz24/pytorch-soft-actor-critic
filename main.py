@@ -12,8 +12,6 @@ from replay_memory import ReplayMemory
 parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
 parser.add_argument('--env-name', default="HalfCheetah-v2",
                     help='name of the environment to run')
-parser.add_argument('--policy', default="Gaussian",
-                    help='algorithm to use: Gaussian | Deterministic')
 parser.add_argument('--eval', type=bool, default=True,
                     help='Evaluates a policy a policy every 10 episode (default:True)')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
@@ -28,7 +26,7 @@ parser.add_argument('--automatic_entropy_tuning', type=bool, default=False, meta
                     help='Temperature parameter α automaically adjusted.')
 parser.add_argument('--seed', type=int, default=456, metavar='N',
                     help='random seed (default: 456)')
-parser.add_argument('--batch_size', type=int, default=256, metavar='N',
+parser.add_argument('--batch_size', type=int, default=100, metavar='N',
                     help='batch size (default: 256)')
 parser.add_argument('--num_steps', type=int, default=1000001, metavar='N',
                     help='maximum number of steps (default: 1000000)')
@@ -55,8 +53,7 @@ env.seed(args.seed)
 # Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
-writer = SummaryWriter(log_dir='runs/{}_SAC_{}_{}_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name,
-                                                             args.policy, "autotune" if args.automatic_entropy_tuning else ""))
+writer = SummaryWriter(log_dir='runs/{}_SAC_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name))
 
 # Memory
 memory = ReplayMemory(args.replay_size)
@@ -82,13 +79,12 @@ for i_episode in itertools.count(1):
         if len(memory) > args.batch_size:
             for i in range(args.updates_per_step):  # Number of updates per step in environment
                 # Update parameters of all the networks
-                critic_1_loss, critic_2_loss, policy_loss, ent_loss, alpha = agent.update_parameters(memory, args.batch_size, updates)
+                value_loss, critic_1_loss, critic_2_loss, policy_loss = agent.update_parameters(memory, args.batch_size, updates)
 
+                writer.add_scalar('loss/value', value_loss, updates)
                 writer.add_scalar('loss/critic_1', critic_1_loss, updates)
                 writer.add_scalar('loss/critic_2', critic_2_loss, updates)
                 writer.add_scalar('loss/policy', policy_loss, updates)
-                writer.add_scalar('loss/entropy_loss', ent_loss, updates)
-                writer.add_scalar('entropy_temprature/alpha', alpha, updates)
                 updates += 1
 
         next_state, reward, done, _ = env.step(action) # Step

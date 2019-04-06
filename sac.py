@@ -34,7 +34,6 @@ class SAC(object):
 
 
             self.policy = GaussianPolicy(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
-            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size).to(self.device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
         else:

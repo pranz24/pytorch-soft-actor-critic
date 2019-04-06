@@ -47,7 +47,10 @@ parser.add_argument('--cuda', action="store_true",
 args = parser.parse_args()
 
 # Environment
-env = gym.make(args.env_name) # Removing Normalized Actions
+# Removing Normalized Actions. 
+# Another way to use it = actions * env.action_space.high[0] -> (https://github.com/sfujim/TD3). This does the same thing.
+# (or add env._max_episode_steps to normalized_actions.py)
+env = gym.make(args.env_name)  
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 env.seed(args.seed)
@@ -55,6 +58,7 @@ env.seed(args.seed)
 # Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
+#TesnorboardX
 writer = SummaryWriter(log_dir='runs/{}_SAC_{}_{}_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name,
                                                              args.policy, "autotune" if args.automatic_entropy_tuning else ""))
 
@@ -75,12 +79,13 @@ for i_episode in itertools.count(1):
 
     while not done:
         if args.start_steps > total_numsteps:
-            action = env.action_space.sample()
+            action = env.action_space.sample()  # Sample random action
         else:
             action = agent.select_action(state)  # Sample action from policy
 
         if len(memory) > args.batch_size:
-            for i in range(args.updates_per_step):  # Number of updates per step in environment
+            # Number of updates per step in environment
+            for i in range(args.updates_per_step):
                 # Update parameters of all the networks
                 critic_1_loss, critic_2_loss, policy_loss, ent_loss, alpha = agent.update_parameters(memory, args.batch_size, updates)
 

@@ -1,7 +1,7 @@
 ### Description
 ------------
 Reimplementation of [Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement
-Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) and [Soft Actor-Critic Algorithms and Applications](https://arxiv.org/pdf/1812.05905.pdf).
+Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf).
 
 
 ### Requirements
@@ -13,7 +13,6 @@ Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) and [Sof
 
 ### Run
 ------------
-(Note: There is no need for setting Temperature(`--alpha`) if `--automatic_entropy_tuning` is True.)
 
 #### For SAC :
 
@@ -27,12 +26,6 @@ python main.py --env-name Humanoid-v2 --aplha 0.05
 python main.py --env-name Humanoid-v2 --aplha 0.05 --tau 1 --target_update_interval 1000
 ```
 
-#### For SAC (Deterministic, Hard Update):
-
-```
-python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_update_interval 1000
-```
-
 ### Default Parameters
 -------------
 
@@ -44,7 +37,6 @@ python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_up
 | learning rate(`--lr`)  | 3x10<sup>−4</sup> |
 | discount(`--gamma`) (γ) | 0.99 |
 | replay buffer size(`--replay_size`) | 1x10<sup>6</sup> |
-| automatic_entropy_tuning(`--automatic_entropy_tuning`)|False|
 |number of hidden layers (all networks)|2|
 |number of hidden units per layer(`--hidden_size`)|256|
 |number of samples per minibatch(`--batch_size`)|256|

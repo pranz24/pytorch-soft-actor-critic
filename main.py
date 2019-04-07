@@ -26,11 +26,11 @@ parser.add_argument('--automatic_entropy_tuning', type=bool, default=False, meta
                     help='Temperature parameter α automaically adjusted.')
 parser.add_argument('--seed', type=int, default=456, metavar='N',
                     help='random seed (default: 456)')
-parser.add_argument('--batch_size', type=int, default=128, metavar='N',
+parser.add_argument('--batch_size', type=int, default=256, metavar='N',
                     help='batch size (default: 256)')
 parser.add_argument('--num_steps', type=int, default=1000001, metavar='N',
                     help='maximum number of steps (default: 1000000)')
-parser.add_argument('--hidden_size', type=int, default=300, metavar='N',
+parser.add_argument('--hidden_size', type=int, default=256, metavar='N',
                     help='hidden size (default: 256)')
 parser.add_argument('--updates_per_step', type=int, default=1, metavar='N',
                     help='model updates per simulator step (default: 1)')
@@ -59,8 +59,6 @@ writer = SummaryWriter(log_dir='runs/{}_VIREL_{}'.format(datetime.datetime.now()
 memory = ReplayMemory(args.replay_size)
 
 # Training Loop
-rewards = []
-test_rewards = []
 total_numsteps = 0
 updates = 0
 
@@ -104,8 +102,7 @@ for i_episode in itertools.count(1):
         break
 
     writer.add_scalar('reward/train', episode_reward, i_episode)
-    rewards.append(episode_reward)
-    print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episode, total_numsteps, episode_steps, np.round(rewards[-1],2)))
+    print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episode, total_numsteps, episode_steps, round(episode_reward, 2)))
 
     if i_episode % 10 == 0 and args.eval == True:
         state = env.reset()
@@ -123,9 +120,8 @@ for i_episode in itertools.count(1):
 
         writer.add_scalar('reward/test', episode_reward, i_episode)
 
-        test_rewards.append(episode_reward)
         print("----------------------------------------")
-        print("Test Episode: {}, reward: {}".format(i_episode, test_rewards[-1]))
+        print("Test Episode: {}, reward: {}".format(i_episode, round(episode_reward, 2)))
         print("----------------------------------------")
 
 env.close()

@@ -66,8 +66,6 @@ writer = SummaryWriter(log_dir='runs/{}_SAC_{}_{}_{}'.format(datetime.datetime.n
 memory = ReplayMemory(args.replay_size)
 
 # Training Loop
-rewards = []
-test_rewards = []
 total_numsteps = 0
 updates = 0
 
@@ -113,8 +111,7 @@ for i_episode in itertools.count(1):
         break
 
     writer.add_scalar('reward/train', episode_reward, i_episode)
-    rewards.append(episode_reward)
-    print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episode, total_numsteps, episode_steps, np.round(rewards[-1],2)))
+    print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episode, total_numsteps, episode_steps, round(episode_reward, 2)))
 
     if i_episode % 10 == 0 and args.eval == True:
         state = env.reset()
@@ -132,9 +129,8 @@ for i_episode in itertools.count(1):
 
         writer.add_scalar('reward/test', episode_reward, i_episode)
 
-        test_rewards.append(episode_reward)
         print("----------------------------------------")
-        print("Test Episode: {}, reward: {}".format(i_episode, test_rewards[-1]))
+        print("Test Episode: {}, reward: {}".format(i_episode, round(episode_reward, 2)))
         print("----------------------------------------")
 
 env.close()

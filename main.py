@@ -26,11 +26,11 @@ parser.add_argument('--automatic_entropy_tuning', type=bool, default=False, meta
                     help='Temperature parameter α automaically adjusted.')
 parser.add_argument('--seed', type=int, default=456, metavar='N',
                     help='random seed (default: 456)')
-parser.add_argument('--batch_size', type=int, default=100, metavar='N',
+parser.add_argument('--batch_size', type=int, default=128, metavar='N',
                     help='batch size (default: 256)')
 parser.add_argument('--num_steps', type=int, default=1000001, metavar='N',
                     help='maximum number of steps (default: 1000000)')
-parser.add_argument('--hidden_size', type=int, default=256, metavar='N',
+parser.add_argument('--hidden_size', type=int, default=300, metavar='N',
                     help='hidden size (default: 256)')
 parser.add_argument('--updates_per_step', type=int, default=1, metavar='N',
                     help='model updates per simulator step (default: 1)')
@@ -53,7 +53,7 @@ env.seed(args.seed)
 # Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
-writer = SummaryWriter(log_dir='runs/{}_SAC_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name))
+writer = SummaryWriter(log_dir='runs/{}_VIREL_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name))
 
 # Memory
 memory = ReplayMemory(args.replay_size)

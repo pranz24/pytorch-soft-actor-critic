@@ -53,7 +53,7 @@ env.seed(args.seed)
 # Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
-writer = SummaryWriter(log_dir='runs/{}_VIREL_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name))
+writer = SummaryWriter(log_dir='runs/{}_SAC_old_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name))
 
 # Memory
 memory = ReplayMemory(args.replay_size)

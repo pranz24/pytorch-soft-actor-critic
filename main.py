@@ -45,7 +45,7 @@ parser.add_argument('--cuda', action="store_true",
 args = parser.parse_args()
 
 # Environment
-env = NormalizedActions(gym.make(args.env_name)) # Removing Normalized Actions
+env = NormalizedActions(gym.make(args.env_name))
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 env.seed(args.seed)

@@ -45,7 +45,7 @@ parser.add_argument('--cuda', action="store_true",
 args = parser.parse_args()
 
 # Environment
-env = gym.make(args.env_name) # Removing Normalized Actions
+env = NormalizedActions(gym.make(args.env_name)) # Removing Normalized Actions
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 env.seed(args.seed)
@@ -105,23 +105,28 @@ for i_episode in itertools.count(1):
     print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episode, total_numsteps, episode_steps, round(episode_reward, 2)))
 
     if i_episode % 10 == 0 and args.eval == True:
-        state = env.reset()
-        episode_reward = 0
-        done = False
-        while not done:
-            action = agent.select_action(state, eval=True)
+        avg_reward = 0.
+        episoddes = 10
+        for _ in range(episodes):
+            state = env.reset()
+            episode_reward = 0
+            done = False
+            while not done:
+                action = agent.select_action(state, eval=True)
 
-            next_state, reward, done, _ = env.step(action)
-            episode_reward += reward
+                next_state, reward, done, _ = env.step(action)
+                episode_reward += reward
 
 
-            state = next_state
+                state = next_state
+            avg_reward += episode_reward
+        avg_reward /= episodes
 
 
         writer.add_scalar('reward/test', episode_reward, i_episode)
 
         print("----------------------------------------")
-        print("Test Episode: {}, reward: {}".format(i_episode, round(episode_reward, 2)))
+        print("Test Episodes: {}, Avg. Reward: {}".format(i_episode, round(episode_reward, 2)))
         print("----------------------------------------")
 
 env.close()

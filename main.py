@@ -132,7 +132,7 @@ for i_episode in itertools.count(1):
         avg_reward /= episodes
 
 
-        writer.add_scalar('reward/test', episode_reward, i_episode)
+        writer.add_scalar('avg_reward/test', avg_reward, i_episode)
 
         print("----------------------------------------")
         print("Test Episodes: {}, Avg. Reward: {}".format(episodes, round(avg_reward, 2)))

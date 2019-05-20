@@ -106,7 +106,7 @@ for i_episode in itertools.count(1):
 
     if i_episode % 10 == 0 and args.eval == True:
         avg_reward = 0.
-        episoddes = 10
+        episodes = 10
         for _ in range(episodes):
             state = env.reset()
             episode_reward = 0

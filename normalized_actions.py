@@ -14,3 +14,6 @@ class NormalizedActions(gym.ActionWrapper):
         action /= (self.action_space.high - self.action_space.low)
         action = action * 2 - 1
         return action
+
+    def _max_episode_steps(self):
+        return self._max_epsidoe_steps

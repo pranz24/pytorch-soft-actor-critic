@@ -47,9 +47,8 @@ parser.add_argument('--cuda', action="store_true",
 args = parser.parse_args()
 
 # Environment
-# Removing Normalized Actions. 
-# Another way to use it = actions * env.action_space.high[0] -> (https://github.com/sfujim/TD3). This does the same thing.
-# (or add env._max_episode_steps to normalized_actions.py)
+# Normalized Actions. 
+# Another way to use it = actions * env.action_space.high[0] -> (https://github.com/sfujim/TD3). This does the same thing. or not?
 env = NormalizedActions(gym.make(args.env_name))
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)

@@ -47,7 +47,7 @@ parser.add_argument('--cuda', action="store_true",
 args = parser.parse_args()
 
 # Environment
-# Not using Normalized Action (seems to degrade the performance).
+# env = NormalizedActions(gym.make(args.env_name))
 env = gym.make(args.env_name)
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)

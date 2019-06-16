@@ -72,9 +72,3 @@ python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_up
 | Ant-v2          | 0.2 |
 | Humanoid-v2     | 0.05 |
 
-### TODO
--------------
-
-- [ ] Upgrade to Pytorch 1.1.0
-- [ ] Upgrade gym to 0.12.5
-- [ ] Replace TensorboardX with torch.utils.tensorboard. (Tensorboard is available in pytorch1.1.0([torch.utils.tensorboard](https://pytorch.org/docs/stable/tensorboard.html))).

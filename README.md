@@ -27,7 +27,7 @@ python main.py --env-name Humanoid-v2 --aplha 0.05
 #### For SAC (Hard Update):
 
 ```
-python main.py --env-name Humanoid-v2 --aplha 0.05 --tau 1 --target_update_interval 1000
+python main.py --env-name Humanoid-v2 --alpha 0.05 --tau 1 --target_update_interval 1000
 ```
 
 #### For SAC (Deterministic, Hard Update):

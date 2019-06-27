@@ -12,6 +12,7 @@ class SAC(object):
         self.gamma = args.gamma
         self.tau = args.tau
         self.alpha = args.alpha
+        self.action_range = [action_space.low, action_space.high]
 
         self.policy_type = args.policy
         self.target_update_interval = args.target_update_interval
@@ -42,18 +43,18 @@ class SAC(object):
             self.policy = DeterministicPolicy(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
-
-
     def select_action(self, state, eval=False):
         state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
         if eval == False:
             action, _, _ = self.policy.sample(state)
         else:
             _, _, action = self.policy.sample(state)
-        action = action.detach().cpu().numpy()
-        return action[0]
+        action = action.detach().cpu().numpy()[0]
+        return self.rescale_action(action)
 
-
+    def rescale_action(self, action):
+        return action * (self.action_range[1] - self.action_range[0]) / 2.0 +\
+            (self.action_range[1] + self.action_range[0]) / 2.0
 
     def update_parameters(self, memory, batch_size, updates):
         # Sample a batch from memory

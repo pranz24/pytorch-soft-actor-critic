@@ -6,7 +6,6 @@ import itertools
 import torch
 from sac import SAC
 from tensorboardX import SummaryWriter
-from normalized_actions import NormalizedActions
 from replay_memory import ReplayMemory
 
 parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
@@ -57,7 +56,7 @@ env.seed(args.seed)
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
 #TesnorboardX
-writer = SummaryWriter(log_dir='runs/{}_SAC_{}_{}_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name,
+writer = SummaryWriter(logdir='runs/{}_SAC_{}_{}_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name,
                                                              args.policy, "autotune" if args.automatic_entropy_tuning else ""))
 
 # Memory

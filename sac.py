@@ -12,6 +12,7 @@ class SAC(object):
         self.gamma = args.gamma
         self.tau = args.tau
         self.alpha = args.alpha
+        self.action_range = [action_space.low, action_space.high]
 
         self.target_update_interval = args.target_update_interval
         self.automatic_entropy_tuning = args.automatic_entropy_tuning
@@ -38,9 +39,12 @@ class SAC(object):
         else:
             _, _, action, _ = self.policy.sample(state)
             action = torch.tanh(action)
-        action = action.detach().cpu().numpy()
-        return action[0]
-
+        action = action.detach().cpu().numpy()[0]
+        return self.rescale_action(action)
+    
+    def rescale_action(self, action):
+        return action * (self.action_range[1] - se;f.action_range[0]) / 2.0 +\
+                (self.action_range[1] + self.action_range[0]) / 2.0
 
 
     def update_parameters(self, memory, batch_size, updates):

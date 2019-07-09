@@ -6,7 +6,6 @@ import itertools
 import torch
 from sac import SAC
 from tensorboardX import SummaryWriter
-from normalized_actions import NormalizedActions
 from replay_memory import ReplayMemory
 
 parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
@@ -45,8 +44,7 @@ parser.add_argument('--cuda', action="store_true",
 args = parser.parse_args()
 
 # Environment
-# Not using Normalized Action (seems to degrade the performance).
-env = NormalizedActions(gym.make(args.env_name))
+env = gym.make(args.env_name)
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 env.seed(args.seed)
@@ -54,7 +52,7 @@ env.seed(args.seed)
 # Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
 
-writer = SummaryWriter(log_dir='runs/{}_SAC_old_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name))
+writer = SummaryWriter(logdir='runs/{}_SAC_V_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name))
 
 # Memory
 memory = ReplayMemory(args.replay_size)

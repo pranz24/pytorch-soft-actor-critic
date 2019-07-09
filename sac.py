@@ -43,7 +43,7 @@ class SAC(object):
         return self.rescale_action(action)
     
     def rescale_action(self, action):
-        return action * (self.action_range[1] - se;f.action_range[0]) / 2.0 +\
+        return action * (self.action_range[1] - self.action_range[0]) / 2.0 +\
                 (self.action_range[1] + self.action_range[0]) / 2.0
 
 

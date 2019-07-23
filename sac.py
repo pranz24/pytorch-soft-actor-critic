@@ -12,7 +12,6 @@ class SAC(object):
         self.gamma = args.gamma
         self.tau = args.tau
         self.alpha = args.alpha
-        self.action_range = [action_space.low, action_space.high]
 
         self.policy_type = args.policy
         self.target_update_interval = args.target_update_interval
@@ -33,14 +32,13 @@ class SAC(object):
                 self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
                 self.alpha_optim = Adam([self.log_alpha], lr=args.lr)
 
-
-            self.policy = GaussianPolicy(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
+            self.policy = GaussianPolicy(num_inputs, action_space.shape[0], args.hidden_size, action_space).to(self.device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
         else:
             self.alpha = 0
             self.automatic_entropy_tuning = False
-            self.policy = DeterministicPolicy(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
+            self.policy = DeterministicPolicy(num_inputs, action_space.shape[0], args.hidden_size, action_space).to(self.device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
     def select_action(self, state, eval=False):
@@ -49,12 +47,7 @@ class SAC(object):
             action, _, _ = self.policy.sample(state)
         else:
             _, _, action = self.policy.sample(state)
-        action = action.detach().cpu().numpy()[0]
-        return self.rescale_action(action)
-
-    def rescale_action(self, action):
-        return action * (self.action_range[1] - self.action_range[0]) / 2.0 +\
-            (self.action_range[1] + self.action_range[0]) / 2.0
+        return action.detach().cpu().numpy()[0]
 
     def update_parameters(self, memory, batch_size, updates):
         # Sample a batch from memory

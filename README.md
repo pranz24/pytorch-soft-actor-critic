@@ -58,7 +58,7 @@ optional arguments:
                         True)
   --gamma G             discount factor for reward (default: 0.99)
   --tau G               target smoothing coefficient(τ) (default: 0.005)
-  --lr G                learning rate (default: 3x10<sup>-4</sup>)
+  --lr G                learning rate (default: 3e-4)
   --alpha G             Temperature parameter α determines the relative
                         importance of the entropy term against the reward
                         (default: 0.2)
@@ -66,14 +66,14 @@ optional arguments:
                         Automaically adjust α (default: False)
   --seed N              random seed (default: 123456)
   --batch_size N        batch size (default: 256)
-  --num_steps N         maximum number of steps (default: 10<sup>6</sup>)
+  --num_steps N         maximum number of steps (default: 1e6)
   --hidden_size N       hidden size (default: 256)
   --updates_per_step N  model updates per simulator step (default: 1)
   --start_steps N       Steps sampling random actions (default: 10<sup>4</sup>)
   --target_update_interval N
                         Value target update per no. of updates per step
                         (default: 1)
-  --replay_size N       size of replay buffer (default: 10<sup>6</sup>)
+  --replay_size N       size of replay buffer (default: 1e6)
   --cuda                run on CUDA (default: False)
 ```
 

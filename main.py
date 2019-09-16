@@ -8,13 +8,13 @@ from sac import SAC
 from tensorboardX import SummaryWriter
 from replay_memory import ReplayMemory
 
-parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
+parser = argparse.ArgumentParser(description='PyTorch Soft Actor-Critic Args')
 parser.add_argument('--env-name', default="HalfCheetah-v2",
-                    help='name of the environment to run')
+                    help='Mujoco Gym environment (default: HalfCheetah-v2)')
 parser.add_argument('--policy', default="Gaussian",
-                    help='algorithm to use: Gaussian | Deterministic')
+                    help='Policy Type: Gaussian | Deterministic (default: Gaussian)')
 parser.add_argument('--eval', type=bool, default=True,
-                    help='Evaluates a policy a policy every 10 episode (default:True)')
+                    help='Evaluates a policy a policy every 10 episode (default: True)')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
                     help='discount factor for reward (default: 0.99)')
 parser.add_argument('--tau', type=float, default=0.005, metavar='G',
@@ -22,11 +22,12 @@ parser.add_argument('--tau', type=float, default=0.005, metavar='G',
 parser.add_argument('--lr', type=float, default=0.0003, metavar='G',
                     help='learning rate (default: 0.0003)')
 parser.add_argument('--alpha', type=float, default=0.2, metavar='G',
-                    help='Temperature parameter α determines the relative importance of the entropy term against the reward (default: 0.2)')
+                    help='Temperature parameter α determines the relative importance of the entropy\
+                            term against the reward (default: 0.2)')
 parser.add_argument('--automatic_entropy_tuning', type=bool, default=False, metavar='G',
-                    help='Temperature parameter α automaically adjusted.')
-parser.add_argument('--seed', type=int, default=456, metavar='N',
-                    help='random seed (default: 456)')
+                    help='Automaically adjust α (default: False)')
+parser.add_argument('--seed', type=int, default=123456, metavar='N',
+                    help='random seed (default: 123456)')
 parser.add_argument('--batch_size', type=int, default=256, metavar='N',
                     help='batch size (default: 256)')
 parser.add_argument('--num_steps', type=int, default=1000001, metavar='N',

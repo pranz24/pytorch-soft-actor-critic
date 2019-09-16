@@ -20,21 +20,30 @@ Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) -> [SAC_
 
 ### Usage
 
+```
+usage: main.py [-h] [--env-name ENV_NAME] [--policy POLICY] [--eval EVAL]
+               [--gamma G] [--tau G] [--lr G] [--alpha G]
+               [--automatic_entropy_tuning G] [--seed N] [--batch_size N]
+               [--num_steps N] [--hidden_size N] [--updates_per_step N]
+               [--start_steps N] [--target_update_interval N]
+               [--replay_size N] [--cuda]
+```
+
 (Note: There is no need for setting Temperature(`--alpha`) if `--automatic_entropy_tuning` is True.)
 
-#### For SAC :
+##### For SAC :
 
 ```
 python main.py --env-name Humanoid-v2 --aplha 0.05
 ```
 
-#### For SAC (Hard Update):
+##### For SAC (Hard Update):
 
 ```
 python main.py --env-name Humanoid-v2 --alpha 0.05 --tau 1 --target_update_interval 1000
 ```
 
-#### For SAC (Deterministic, Hard Update):
+##### For SAC (Deterministic, Hard Update):
 
 ```
 python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_update_interval 1000
@@ -43,13 +52,6 @@ python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_up
 ### Arguments
 
 ```
-usage: main.py [-h] [--env-name ENV_NAME] [--policy POLICY] [--eval EVAL]
-               [--gamma G] [--tau G] [--lr G] [--alpha G]
-               [--automatic_entropy_tuning G] [--seed N] [--batch_size N]
-               [--num_steps N] [--hidden_size N] [--updates_per_step N]
-               [--start_steps N] [--target_update_interval N]
-               [--replay_size N] [--cuda]
-
 PyTorch Soft Actor-Critic Args
 
 optional arguments:
@@ -60,7 +62,7 @@ optional arguments:
   --eval EVAL           Evaluates a policy a policy every 10 episode (default:
                         True)
   --gamma G             discount factor for reward (default: 0.99)
-  --tau G               target smoothing coefficient(τ) (default: 0.005)
+  --tau G               target smoothing coefficient(τ) (default: 5e-3)
   --lr G                learning rate (default: 3e-4)
   --alpha G             Temperature parameter α determines the relative
                         importance of the entropy term against the reward
@@ -72,7 +74,7 @@ optional arguments:
   --num_steps N         maximum number of steps (default: 1e6)
   --hidden_size N       hidden size (default: 256)
   --updates_per_step N  model updates per simulator step (default: 1)
-  --start_steps N       Steps sampling random actions (default: 10<sup>4</sup>)
+  --start_steps N       Steps sampling random actions (default: 1e4)
   --target_update_interval N
                         Value target update per no. of updates per step
                         (default: 1)

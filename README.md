@@ -14,8 +14,12 @@ Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) -> [SAC_
 - [TensorboardX](https://github.com/lanpa/tensorboardX)
 - [PyTorch](http://pytorch.org/)
 
-### Run
-------------
+
+### Default Arguments and Usage
+-------------
+
+### Usage
+
 (Note: There is no need for setting Temperature(`--alpha`) if `--automatic_entropy_tuning` is True.)
 
 #### For SAC :
@@ -36,8 +40,7 @@ python main.py --env-name Humanoid-v2 --alpha 0.05 --tau 1 --target_update_inter
 python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_update_interval 1000
 ```
 
-### Default Arguments
--------------
+### Arguments
 
 ```
 usage: main.py [-h] [--env-name ENV_NAME] [--policy POLICY] [--eval EVAL]

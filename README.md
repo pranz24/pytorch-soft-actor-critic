@@ -34,7 +34,7 @@ usage: main.py [-h] [--env-name ENV_NAME] [--policy POLICY] [--eval EVAL]
 ##### For SAC :
 
 ```
-python main.py --env-name Humanoid-v2 --aplha 0.05
+python main.py --env-name Humanoid-v2 --alpha 0.05
 ```
 
 ##### For SAC (Hard Update):

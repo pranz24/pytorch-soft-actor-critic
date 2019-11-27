@@ -148,4 +148,5 @@ class DeterministicPolicy(nn.Module):
     def to(self, device):
         self.action_scale = self.action_scale.to(device)
         self.action_bias = self.action_bias.to(device)
-        return super(GaussianPolicy, self).to(device)
+        self.noise = self.noise.to(device)
+        return super(DeterministicPolicy, self).to(device)

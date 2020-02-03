@@ -8,9 +8,9 @@ Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) -> [SAC_
 
 ### Requirements
 ------------
--  [mujoco-py](https://github.com/openai/mujoco-py)
--  [TensorboardX](https://github.com/lanpa/tensorboardX)
--  [PyTorch](http://pytorch.org/)
+-    [mujoco-py](https://github.com/openai/mujoco-py)
+-    [TensorboardX](https://github.com/lanpa/tensorboardX)
+-    [PyTorch](http://pytorch.org/)
 
 ### Default Arguments and Usage
 ------------
@@ -79,10 +79,10 @@ optional arguments:
 ```
 
 | Environment **(`--env-name`)**| Temperature **(`--alpha`)**|
-| --------------- | ------------- |
-| HalfCheetah-v2  |      0.2      |
-| Hopper-v2       |      0.2      |
-| Walker2d-v2     |      0.2      |
-| Ant-v2          |      0.2      |
-| Humanoid-v2     |     0.05      |
+| ---------------| -------------|
+| HalfCheetah-v2| 0.2|
+| Hopper-v2| 0.2|
+| Walker2d-v2| 0.2|
+| Ant-v2| 0.2|
+| Humanoid-v2| 0.05|
 

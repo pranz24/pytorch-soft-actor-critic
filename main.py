@@ -111,7 +111,7 @@ for i_episode in itertools.count(1):
     writer.add_scalar('reward/train', episode_reward, i_episode)
     print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episode, total_numsteps, episode_steps, round(episode_reward, 2)))
 
-    if i_episode % 10 == 0 and args.eval == True:
+    if i_episode % 10 == 0 and args.eval is True:
         avg_reward = 0.
         episodes = 10
         for _  in range(episodes):

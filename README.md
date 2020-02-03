@@ -8,9 +8,9 @@ Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) -> [SAC_
 
 ### Requirements
 ------------
-  -  [mujoco-py](https://github.com/openai/mujoco-py)
-  -  [TensorboardX](https://github.com/lanpa/tensorboardX)
-  -  [PyTorch](http://pytorch.org/)
+-  [mujoco-py](https://github.com/openai/mujoco-py)
+-  [TensorboardX](https://github.com/lanpa/tensorboardX)
+-  [PyTorch](http://pytorch.org/)
 
 ### Default Arguments and Usage
 ------------

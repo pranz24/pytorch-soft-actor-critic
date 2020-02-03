@@ -8,14 +8,12 @@ Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) -> [SAC_
 
 ### Requirements
 ------------
-
--  [mujoco-py](https://github.com/openai/mujoco-py)
--  [TensorboardX](https://github.com/lanpa/tensorboardX)
--  [PyTorch](http://pytorch.org/)
+  -  [mujoco-py](https://github.com/openai/mujoco-py)
+  -  [TensorboardX](https://github.com/lanpa/tensorboardX)
+  -  [PyTorch](http://pytorch.org/)
 
 ### Default Arguments and Usage
--------------
-
+------------
 ### Usage
 
 ```
@@ -29,25 +27,26 @@ usage: main.py [-h] [--env-name ENV_NAME] [--policy POLICY] [--eval EVAL]
 
 (Note: There is no need for setting Temperature(`--alpha`) if `--automatic_entropy_tuning` is True.)
 
-##### For SAC
+#### For SAC
 
 ```
 python main.py --env-name Humanoid-v2 --alpha 0.05
 ```
 
-##### For SAC (Hard Update)
+#### For SAC (Hard Update)
 
 ```
 python main.py --env-name Humanoid-v2 --alpha 0.05 --tau 1 --target_update_interval 1000
 ```
 
-##### For SAC (Deterministic, Hard Update)
+#### For SAC (Deterministic, Hard Update)
 
 ```
 python main.py --env-name Humanoid-v2 --policy Deterministic --tau 1 --target_update_interval 1000
 ```
 
 ### Arguments
+------------
 ```
 PyTorch Soft Actor-Critic Args
 
@@ -78,8 +77,6 @@ optional arguments:
   --replay_size N       size of replay buffer (default: 1e6)
   --cuda                run on CUDA (default: False)
 ```
-
-------------
 
 | Environment **(`--env-name`)**| Temperature **(`--alpha`)**|
 | --------------- | ------------- |

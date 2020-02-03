@@ -4,13 +4,13 @@ Reimplementation of [Soft Actor-Critic Algorithms and Applications](https://arxi
 Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf).
 
 Added another branch for [Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement
-Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) -> [SAC_V](https://github.com/pranz24/pytorch-soft-actor-critic/tree/SAC_V)
+Learning with a Stochastic Actor](https://arxiv.org/pdf/1801.01290.pdf) -> [SAC_V](https://github.com/pranz24/pytorch-soft-actor-critic/tree/SAC_V).
 
 ### Requirements
 ------------
--  [mujoco-py](https://github.com/openai/mujoco-py)
--  [TensorboardX](https://github.com/lanpa/tensorboardX)
--  [PyTorch](http://pytorch.org/)
+*   [mujoco-py](https://github.com/openai/mujoco-py)
+*   [TensorboardX](https://github.com/lanpa/tensorboardX)
+*   [PyTorch](http://pytorch.org/)
 
 ### Default Arguments and Usage
 ------------

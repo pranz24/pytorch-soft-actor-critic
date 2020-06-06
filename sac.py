@@ -64,7 +64,12 @@ class SAC(object):
         qf1, qf2 = self.critic(state_batch, action_batch)  # Two Q-functions to mitigate positive bias in the policy improvement step
         qf1_loss = F.mse_loss(qf1, next_q_value) # JQ = 𝔼(st,at)~D[0.5(Q1(st,at) - r(st,at) - γ(𝔼st+1~p[V(st+1)]))^2]
         qf2_loss = F.mse_loss(qf2, next_q_value) # JQ = 𝔼(st,at)~D[0.5(Q1(st,at) - r(st,at) - γ(𝔼st+1~p[V(st+1)]))^2]
-        
+        qf_loss = qf1_loss + qf2_loss
+
+        self.critic_optim.zero_grad()
+        qf_loss.backward()
+        self.critic_optim.step()
+
         pi, log_pi, mean, log_std = self.policy.sample(state_batch)
 
         qf1_pi, qf2_pi = self.critic(state_batch, pi)
@@ -75,7 +80,12 @@ class SAC(object):
         reg_loss = 0.001 * (mean.pow(2).mean() + log_std.pow(2).mean())
         policy_loss += reg_loss
 
+        self.policy_optim.zero_grad()
+        policy_loss.backward()
+        self.policy_optim.step()
+
         vf = self.value(state_batch)
+        
         with torch.no_grad():
             vf_target = min_qf_pi - (self.alpha * log_pi)
 
@@ -84,19 +94,6 @@ class SAC(object):
         self.value_optim.zero_grad()
         vf_loss.backward()
         self.value_optim.step()
-
-        self.critic_optim.zero_grad()
-        qf1_loss.backward()
-        self.critic_optim.step()
-
-        self.critic_optim.zero_grad()
-        qf2_loss.backward()
-        self.critic_optim.step()
-        
-        self.policy_optim.zero_grad()
-        policy_loss.backward()
-        self.policy_optim.step()
-
 
         if updates % self.target_update_interval == 0:
             soft_update(self.value_target, self.value, self.tau)

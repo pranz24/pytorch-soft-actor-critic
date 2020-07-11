@@ -49,9 +49,11 @@ args = parser.parse_args()
 # Environment
 # env = NormalizedActions(gym.make(args.env_name))
 env = gym.make(args.env_name)
+env.seed(args.seed)
+env.action_space.seed(args.seed)
+
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
-env.seed(args.seed)
 
 # Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
@@ -61,7 +63,7 @@ writer = SummaryWriter('runs/{}_SAC_{}_{}_{}'.format(datetime.datetime.now().str
                                                              args.policy, "autotune" if args.automatic_entropy_tuning else ""))
 
 # Memory
-memory = ReplayMemory(args.replay_size)
+memory = ReplayMemory(args.replay_size, args.seed)
 
 # Training Loop
 total_numsteps = 0

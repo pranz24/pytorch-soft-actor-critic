@@ -46,9 +46,11 @@ args = parser.parse_args()
 
 # Environment
 env = gym.make(args.env_name)
+env.seed(args.seed)
+env.action_space.seed(args.seed)
+
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
-env.seed(args.seed)
 
 # Agent
 agent = SAC(env.observation_space.shape[0], env.action_space, args)
@@ -56,7 +58,7 @@ agent = SAC(env.observation_space.shape[0], env.action_space, args)
 writer = SummaryWriter('runs/{}_SAC_V_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name))
 
 # Memory
-memory = ReplayMemory(args.replay_size)
+memory = ReplayMemory(args.replay_size, args.seed)
 
 # Training Loop
 total_numsteps = 0

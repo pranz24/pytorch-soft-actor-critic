@@ -6,11 +6,13 @@ import itertools
 import torch
 from sac import SAC
 from torch.utils.tensorboard import SummaryWriter
+
 from replay_memory import ReplayMemory
+from continuous_cartpole import ContinuousCartPole
 
 parser = argparse.ArgumentParser(description='PyTorch Soft Actor-Critic Args')
-parser.add_argument('--env-name', default="HalfCheetah-v2",
-                    help='Mujoco Gym environment (default: HalfCheetah-v2)')
+# parser.add_argument('--env-name', default="HalfCheetah-v2",
+#                     help='Mujoco Gym environment (default: HalfCheetah-v2)')
 parser.add_argument('--policy', default="Gaussian",
                     help='Policy Type: Gaussian | Deterministic (default: Gaussian)')
 parser.add_argument('--eval', type=bool, default=True,
@@ -45,10 +47,12 @@ parser.add_argument('--replay_size', type=int, default=1000000, metavar='N',
 parser.add_argument('--cuda', action="store_true",
                     help='run on CUDA (default: False)')
 args = parser.parse_args()
+args.env_name = "continuous_cartpole"
 
 # Environment
 # env = NormalizedActions(gym.make(args.env_name))
-env = gym.make(args.env_name)
+# env = gym.make(args.env_name)
+env = ContinuousCartPole()
 env.seed(args.seed)
 env.action_space.seed(args.seed)
 
@@ -99,9 +103,10 @@ for i_episode in itertools.count(1):
         total_numsteps += 1
         episode_reward += reward
 
-        # Ignore the "done" signal if it comes from hitting the time horizon.
-        # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
-        mask = 1 if episode_steps == env._max_episode_steps else float(not done)
+        # # Ignore the "done" signal if it comes from hitting the time horizon.
+        # # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
+        # mask = 1 if episode_steps == env._max_episode_steps else float(not done)
+        mask = float(not done)
 
         memory.push(state, action, reward, next_state, mask) # Append transition to memory
 

@@ -21,3 +21,21 @@ class ReplayMemory:
 
     def __len__(self):
         return len(self.buffer)
+
+    def save_buffer(self, env_name, suffix="", save_path=None):
+        if not os.path.exists('checkpoints/'):
+            os.makedirs('checkpoints/')
+
+        if save_path is None:
+            save_path = "checkpoints/sac_buffer_{}_{}".format(env_name, suffix)
+        print('Saving buffer to {}'.format(save_path))
+
+        with open(save_path, 'wb') as f:
+            pickle.dump(self.buffer, f)
+
+    def load_buffer(self, save_path):
+        print('Loading buffer from {}'.format(save_path))
+
+        with open(save_path, "rb") as f:
+            self.buffer = pickle.load(f)
+            self.position = len(self.buffer) % self.capacity
